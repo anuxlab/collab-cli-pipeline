@@ -1,0 +1,65 @@
+[
+  {
+    "attempt": 0,
+    "started_at_utc": "2026-10-29T18:53:04.109675+00:00",
+    "orchestrator": "langgraph",
+    "model_call_status": "success",
+    "model_call_seconds": 54.549,
+    "execution": {
+      "returncode": 125,
+      "stdout": "",
+      "stderr": "Unable to find image 'collab-agent-sandbox:latest' locally\ndocker: Error response from daemon: pull access denied for collab-agent-sandbox, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information\n",
+      "duration_seconds": 0.322,
+      "timed_out": false,
+      "sandbox": "docker-network-disabled",
+      "container_id": null
+    },
+    "candidate_file": "generated_attempt_0.py",
+    "finished_at_utc": "2026-10-29T18:53:58.658419+00:00",
+    "validation": "process_failed_or_timed_out",
+    "status": "failed",
+    "metrics": null
+  },
+  {
+    "attempt": 1,
+    "started_at_utc": "2026-10-29T18:53:58.659688+00:00",
+    "orchestrator": "langgraph",
+    "model_call_status": "success",
+    "model_call_seconds": 69.324,
+    "execution": {
+      "returncode": 125,
+      "stdout": "",
+      "stderr": "Unable to find image 'collab-agent-sandbox:latest' locally\ndocker: Error response from daemon: pull access denied for collab-agent-sandbox, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information\n",
+      "duration_seconds": 0.18,
+      "timed_out": false,
+      "sandbox": "docker-network-disabled",
+      "container_id": null
+    },
+    "candidate_file": "generated_attempt_1.py",
+    "finished_at_utc": "2026-10-29T18:55:07.983722+00:00",
+    "validation": "process_failed_or_timed_out",
+    "status": "failed",
+    "metrics": null
+  },
+  {
+    "attempt": 2,
+    "started_at_utc": "2026-10-29T18:55:07.985040+00:00",
+    "orchestrator": "langgraph",
+    "model_call_status": "success",
+    "model_call_seconds": 86.017,
+    "execution": {
+      "returncode": 125,
+      "stdout": "",
+      "stderr": "Unable to find image 'collab-agent-sandbox:latest' locally\ndocker: Error response from daemon: pull access denied for collab-agent-sandbox, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information\n",
+      "duration_seconds": 0.098,
+      "timed_out": false,
+      "sandbox": "docker-network-disabled",
+      "container_id": null
+    },
+    "candidate_file": "generated_attempt_2.py",
+    "finished_at_utc": "2026-10-29T18:56:34.002217+00:00",
+    "validation": "process_failed_or_timed_out",
+    "status": "failed",
+    "metrics": null
+  }
+]

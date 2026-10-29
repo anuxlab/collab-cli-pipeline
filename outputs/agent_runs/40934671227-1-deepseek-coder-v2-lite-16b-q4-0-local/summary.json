@@ -1,0 +1,25 @@
+{
+  "experiment": "ai_notebook_code_repair",
+  "model": "deepseek-coder-v2:16b-lite-instruct-q4_0",
+  "inference_backend": "local_ollama",
+  "orchestrator": "langgraph",
+  "ollama_url": "http://127.0.0.1:11434",
+  "status": "failed",
+  "max_repairs": 2,
+  "attempts_used": 3,
+  "started_at_utc": "2026-10-29T18:53:04.109675+00:00",
+  "finished_at_utc": "2026-10-29T18:56:34.051671+00:00",
+  "metrics": null,
+  "final_execution": {
+    "returncode": 125,
+    "stdout": "",
+    "stderr": "Unable to find image 'collab-agent-sandbox:latest' locally\ndocker: Error response from daemon: pull access denied for collab-agent-sandbox, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information\n",
+    "duration_seconds": 0.098,
+    "timed_out": false,
+    "sandbox": "docker-network-disabled",
+    "container_id": null
+  },
+  "final_validation": "process_failed_or_timed_out",
+  "final_error": "process_failed_or_timed_out",
+  "safety_note": "Workflow runs use a Docker container with networking disabled, resource limits, read-only root filesystem, and no credentials. Local fallback execution is not hardened."
+}

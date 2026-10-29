@@ -1,0 +1,247 @@
+{
+  "schema_version": "1.0",
+  "generated_at_utc": "2026-10-29T18:56:34.327252+00:00",
+  "identity": {
+    "repository": "anuxlab/collab-cli-pipeline",
+    "workflow": "Local AI Agent Experiment — DeepSeek-Coder-V2-Lite 16B Q4_0 (Ollama)",
+    "run_id": "40934671227",
+    "run_attempt": "1",
+    "commit_sha": "248349745aca42fb80e2948a303790ee4de91fee",
+    "ref": "refs/heads/main",
+    "runner_os": "Linux",
+    "runner_arch": "X64"
+  },
+  "model": {
+    "requested": "deepseek-coder-v2:16b-lite-instruct-q4_0",
+    "backend": "local Ollama",
+    "quantization": "Q4_0",
+    "context_tokens": "2048",
+    "generation_tokens": "1200",
+    "batch_size": "16"
+  },
+  "status": "failed",
+  "failure_classification": {
+    "code": "GENERATED_CODE_OR_VALIDATION_FAILURE",
+    "explanation": "Inference may have completed, but generated code failed execution or output validation."
+  },
+  "stage_status": {
+    "ollama_setup": "success",
+    "model_pull": "success",
+    "model_check": "success",
+    "agent_step": "failure"
+  },
+  "runner_resources": {
+    "cpu_count": 4,
+    "memory_kib": {
+      "MemTotal": 16371756,
+      "MemAvailable": 15037968,
+      "SwapTotal": 3145724,
+      "SwapFree": 3145724
+    },
+    "workspace_disk_bytes": {
+      "total": 154894188544,
+      "used": 63165153280,
+      "free": 91712258048
+    },
+    "gpu": {
+      "available": false,
+      "details": "No NVIDIA GPU detected; standard hosted runner uses CPU inference."
+    },
+    "runner_name": "GitHub Actions 1000001593",
+    "runner_os": "Linux",
+    "runner_arch": "X64"
+  },
+  "agent_summary": {
+    "experiment": "ai_notebook_code_repair",
+    "model": "deepseek-coder-v2:16b-lite-instruct-q4_0",
+    "inference_backend": "local_ollama",
+    "orchestrator": "langgraph",
+    "ollama_url": "http://127.0.0.1:11434",
+    "status": "failed",
+    "max_repairs": 2,
+    "attempts_used": 3,
+    "started_at_utc": "2026-10-29T18:53:04.109675+00:00",
+    "finished_at_utc": "2026-10-29T18:56:34.051671+00:00",
+    "metrics": null,
+    "final_execution": {
+      "returncode": 125,
+      "stdout": "",
+      "stderr": "Unable to find image 'collab-agent-sandbox:latest' locally\ndocker: Error response from daemon: pull access denied for collab-agent-sandbox, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information\n",
+      "duration_seconds": 0.098,
+      "timed_out": false,
+      "sandbox": "docker-network-disabled",
+      "container_id": null
+    },
+    "final_validation": "process_failed_or_timed_out",
+    "final_error": "process_failed_or_timed_out",
+    "safety_note": "Workflow runs use a Docker container with networking disabled, resource limits, read-only root filesystem, and no credentials. Local fallback execution is not hardened."
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "started_at_utc": "2026-10-29T18:53:04.109675+00:00",
+      "orchestrator": "langgraph",
+      "model_call_status": "success",
+      "model_call_seconds": 54.549,
+      "execution": {
+        "returncode": 125,
+        "stdout": "",
+        "stderr": "Unable to find image 'collab-agent-sandbox:latest' locally\ndocker: Error response from daemon: pull access denied for collab-agent-sandbox, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information\n",
+        "duration_seconds": 0.322,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": null
+      },
+      "candidate_file": "generated_attempt_0.py",
+      "finished_at_utc": "2026-10-29T18:53:58.658419+00:00",
+      "validation": "process_failed_or_timed_out",
+      "status": "failed",
+      "metrics": null
+    },
+    {
+      "attempt": 1,
+      "started_at_utc": "2026-10-29T18:53:58.659688+00:00",
+      "orchestrator": "langgraph",
+      "model_call_status": "success",
+      "model_call_seconds": 69.324,
+      "execution": {
+        "returncode": 125,
+        "stdout": "",
+        "stderr": "Unable to find image 'collab-agent-sandbox:latest' locally\ndocker: Error response from daemon: pull access denied for collab-agent-sandbox, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information\n",
+        "duration_seconds": 0.18,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": null
+      },
+      "candidate_file": "generated_attempt_1.py",
+      "finished_at_utc": "2026-10-29T18:55:07.983722+00:00",
+      "validation": "process_failed_or_timed_out",
+      "status": "failed",
+      "metrics": null
+    },
+    {
+      "attempt": 2,
+      "started_at_utc": "2026-10-29T18:55:07.985040+00:00",
+      "orchestrator": "langgraph",
+      "model_call_status": "success",
+      "model_call_seconds": 86.017,
+      "execution": {
+        "returncode": 125,
+        "stdout": "",
+        "stderr": "Unable to find image 'collab-agent-sandbox:latest' locally\ndocker: Error response from daemon: pull access denied for collab-agent-sandbox, repository does not exist or may require 'docker login': denied: requested access to the resource is denied\n\nRun 'docker run --help' for more information\n",
+        "duration_seconds": 0.098,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": null
+      },
+      "candidate_file": "generated_attempt_2.py",
+      "finished_at_utc": "2026-10-29T18:56:34.002217+00:00",
+      "validation": "process_failed_or_timed_out",
+      "status": "failed",
+      "metrics": null
+    }
+  ],
+  "ollama_model_list": {
+    "returncode": 0,
+    "stdout": "NAME                                        ID              SIZE      MODIFIED      \ndeepseek-coder-v2:16b-lite-instruct-q4_0    63fb193b3a9b    8.9 GB    3 minutes ago    \n",
+    "stderr": ""
+  },
+  "log_inventory": [
+    {
+      "file": "model_check.log",
+      "bytes": 497,
+      "lines": 21
+    },
+    {
+      "file": "model_pull.log",
+      "bytes": 70125,
+      "lines": 506
+    },
+    {
+      "file": "ollama-install-stderr.log",
+      "bytes": 0,
+      "lines": 0
+    },
+    {
+      "file": "ollama-install.log",
+      "bytes": 6844,
+      "lines": 92
+    },
+    {
+      "file": "ollama-serve.log",
+      "bytes": 48799,
+      "lines": 526
+    },
+    {
+      "file": "docker-images.txt",
+      "bytes": 632,
+      "lines": 7
+    },
+    {
+      "file": "final-disk.txt",
+      "bytes": 89,
+      "lines": 2
+    },
+    {
+      "file": "final-free-memory.txt",
+      "bytes": 207,
+      "lines": 3
+    },
+    {
+      "file": "model_check_status.txt",
+      "bytes": 15,
+      "lines": 1
+    },
+    {
+      "file": "model_pull_status.txt",
+      "bytes": 27,
+      "lines": 2
+    },
+    {
+      "file": "ollama-list-after-pull.txt",
+      "bytes": 191,
+      "lines": 2
+    },
+    {
+      "file": "ollama-ps.txt",
+      "bytes": 257,
+      "lines": 2
+    },
+    {
+      "file": "ollama_setup_status.txt",
+      "bytes": 15,
+      "lines": 1
+    },
+    {
+      "file": "stderr_attempt_0.txt",
+      "bytes": 294,
+      "lines": 4
+    },
+    {
+      "file": "stderr_attempt_1.txt",
+      "bytes": 294,
+      "lines": 4
+    },
+    {
+      "file": "stderr_attempt_2.txt",
+      "bytes": 294,
+      "lines": 4
+    },
+    {
+      "file": "stdout_attempt_0.txt",
+      "bytes": 0,
+      "lines": 0
+    },
+    {
+      "file": "stdout_attempt_1.txt",
+      "bytes": 0,
+      "lines": 0
+    },
+    {
+      "file": "stdout_attempt_2.txt",
+      "bytes": 0,
+      "lines": 0
+    }
+  ],
+  "recommended_next_action": "Inference may have completed, but generated code failed execution or output validation."
+}
