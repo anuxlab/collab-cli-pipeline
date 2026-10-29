@@ -85,22 +85,26 @@ This prototype runs fixed, reviewed benchmark code; it does not yet ask an LLM t
 
 ## AI coding-agent experiments (manual-only, local inference)
 
-The original **Collab CLI Experiment Pipeline** and conventional ML benchmark remain in place. Three additional workflows test models through **Ollama running on the runner**. They do not call Hugging Face Inference Providers, OpenAI, or another hosted inference endpoint, and do not require `HF_TOKEN`.
+The original **Collab CLI Experiment Pipeline** and conventional ML benchmark remain in place. Three manually triggered workflows test quantized coding models through **Ollama running on GitHub-hosted runners**. They do not call Hugging Face Inference Providers, OpenAI, or another hosted inference endpoint, and do not require `HF_TOKEN`.
 
-| Workflow in Actions | Model served locally by Ollama | Runner requirement | Workflow file |
+| Workflow in Actions | Model served locally by Ollama | Runner | Workflow file |
 |---|---|---|---|
-| Local AI Agent Experiment — Qwen2.5-Coder 7B (Ollama) | `qwen2.5-coder:7b` | GitHub-hosted Ubuntu runner; model memory use may be close to runner limits | `.github/workflows/agent-qwen-coder-7b.yml` |
-| Local AI Agent Experiment — Qwen2.5-Coder 32B (Ollama) | `qwen2.5-coder:32b` | Self-hosted Linux x64 runner labelled `ollama-32b`, with Ollama installed and sufficient RAM/VRAM. A quantized 32B model typically needs a machine with at least around 32 GB RAM; more is preferable. | `.github/workflows/agent-qwen-coder-32b.yml` |
-| Local AI Agent Experiment — DeepSeek-Coder-V2-Lite (Ollama) | `deepseek-coder-v2:16b` | Self-hosted Linux x64 runner labelled `ollama-deepseek`, with Ollama installed and sufficient RAM/VRAM. | `.github/workflows/agent-deepseek-coder.yml` |
+| Local AI Agent Experiment — Qwen2.5-Coder 14B Q4_K_M (Ollama) | `qwen2.5-coder:14b-instruct-q4_K_M` (~9 GB) | GitHub-hosted `ubuntu-latest`, CPU-only | `.github/workflows/agent-qwen-coder-32b.yml` |
+| Local AI Agent Experiment — Qwen2.5-Coder 7B Q4_K_M (Ollama) | `qwen2.5-coder:7b-instruct-q4_K_M` (~5.4 GB) | GitHub-hosted `ubuntu-latest`, CPU-only | `.github/workflows/agent-qwen-coder-7b.yml` |
+| Local AI Agent Experiment — DeepSeek-Coder-V2-Lite 16B Q4_0 (Ollama) | `deepseek-coder-v2:16b-lite-instruct-q4_0` (~8.9 GB) | GitHub-hosted `ubuntu-latest`, CPU-only | `.github/workflows/agent-deepseek-coder.yml` |
 
-All three use only `workflow_dispatch`: **no push, pull-request, or scheduled trigger**. Each run has a unique path based on run ID, attempt, and model slug, preserving history instead of overwriting previous experiment outputs.
+All three use only `workflow_dispatch`: **no push, pull-request, or scheduled trigger**. Each run has a unique path based on run ID, attempt, and model slug, preserving history instead of overwriting previous experiment outputs. The existing workflow file paths were retained while updating the displayed names and model IDs, so the previous Actions run history remains associated with those workflow paths.
 
-### Local inference and runner setup
+### Local inference and hosted-runner memory tuning
 
-- On the GitHub-hosted 7B workflow, Ollama is installed during the manually triggered run, model weights are downloaded to the runner, and inference is served by `http://127.0.0.1:11434`.
-- The 32B and DeepSeek-Coder-V2-Lite workflows use self-hosted runners because standard GitHub-hosted runners do not have enough memory for those model sizes. Register your own Linux x64 machine as a GitHub Actions self-hosted runner and add the matching custom label (`ollama-32b` or `ollama-deepseek`). Install Ollama and ensure the runner account can execute `ollama`.
-- Model downloads require outbound internet access to fetch public weights, but **prompts and inference requests are sent to the local Ollama daemon**. No inference-provider account or `HF_TOKEN` is used.
-- Open **Actions**, choose one local AI Agent Experiment workflow, and click **Run workflow**. Choose 0, 1, or 2 repair attempts and an execution timeout.
+- All three AI workflows now use GitHub-hosted `ubuntu-latest` and are triggered manually only. They no longer require self-hosted runner labels, so the old 32B and 16B workflows will not sit queued waiting for a private machine.
+- Standard GitHub-hosted `ubuntu-latest` runners do not expose a GPU. Ollama therefore runs these experiments on CPU; VRAM cannot be borrowed as system RAM. GitHub currently documents standard public-repository Linux runners as 4 vCPU/16 GB RAM and private-repository standard Linux runners as 2 vCPU/8 GB RAM. The 14B/16B models are best-effort on the public 16 GB runner and are not reliable on the private 8 GB runner. Quantized weights are only part of peak memory use. A bounded 2 GiB swapfile is attempted when storage permits, but it cannot guarantee a model will fit and can make inference very slow. See the current [GitHub-hosted runner specifications](https://docs.github.com/en/actions/reference/runners/github-hosted-runners).
+- The selected model set is Qwen2.5-Coder 7B Q4_K_M (baseline), Qwen2.5-Coder 14B Q4_K_M, and DeepSeek-Coder-V2-Lite 16B Q4_0. Both larger models are quantized and exceed 7B; the original 32B model is not practical for a standard hosted runner with limited RAM.
+- Ollama is configured for one parallel request, one loaded model, a 1024-token context, a 512-token generation cap, a reduced 32-token batch size, Flash Attention, and an 8-bit KV cache. These settings trade context/output capacity for lower peak memory use. Ollama keeps only one model loaded and allows a one-minute idle keep-alive to avoid reloading the large model between generation and repair calls.
+- After model download and sandbox image build, the workflow attempts to add a temporary 2 GiB disk-backed swapfile only when at least 3 GiB of disk remains. Swap uses SSD, not GPU VRAM; it may avoid some out-of-memory failures but can make inference much slower. If storage is tight, the workflow skips swap and records that decision. Runner RAM, disk, GPU, and swap diagnostics are saved with the run.
+- Model weights are downloaded to the ephemeral runner during each run. Prompts and inference stay on the local Ollama daemon; no hosted inference API or `HF_TOKEN` is used.
+- The workflow records available RAM, disk, CPU count, and whether an NVIDIA GPU is visible, so run reports can be interpreted against the actual runner resources.
+
 
 ### Agent loop and safety
 
@@ -119,3 +123,15 @@ pytest -q
 
 The unit tests validate code extraction, metric validation, credential isolation, and local Ollama request handling using a mocked response. They do not download model weights or run live inference. Model experiments must be manually started in GitHub Actions.
 
+
+## Analysis-first AI-agent artifacts
+
+Every manually triggered local Ollama model workflow now builds a compact, analysis-first artifact even when setup, model download, inference, generated-code execution, or validation fails. Start with these files rather than reading raw logs line-by-line:
+
+- `analysis_report.md` — executive diagnosis, stage statuses, resource snapshot, metrics, and short log excerpts.
+- `analysis.json` — structured run identity, model settings, runner resources, attempt results, log inventory, failure classification, and next action.
+- `artifact_manifest.json` — all artifact files and byte sizes.
+- `summary.json` and `audit.json` — agent outcome and per-attempt details when the agent starts.
+- `runner_resources.json`, `swap_status.txt`, `model_pull.log`, `ollama-serve.log`, and final system snapshots — supporting evidence.
+
+The model jobs use low-memory local Ollama settings (512-token context, 384-token generation cap, batch 16, one model/request at a time). Standard GitHub-hosted runners do not expose GPU VRAM; the workflows do not pretend that disk swap is VRAM. Larger quantized models may still be slow or OOM on hosted CPU runners. Setup/pull failures are captured and summarized, and artifacts are uploaded on failure. All model workflows remain manual-only.

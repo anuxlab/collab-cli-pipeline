@@ -1,4 +1,4 @@
-name: Local AI Agent Experiment — Qwen2.5-Coder 32B (Ollama)
+name: Local AI Agent Experiment — Qwen2.5-Coder 14B Q4_K_S (Ollama)
 
 # Deliberately manual-only. Do not add push, pull_request, or schedule triggers.
 on:
@@ -13,6 +13,15 @@ on:
           - "0"
           - "1"
           - "2"
+      model_timeout:
+        description: "Per-request local model timeout in seconds"
+        type: choice
+        required: true
+        default: "600"
+        options:
+          - "300"
+          - "600"
+          - "900"
       execution_timeout:
         description: "Generated script execution timeout in seconds"
         type: choice
@@ -27,20 +36,24 @@ permissions:
   contents: read
 
 concurrency:
-  group: ai-agent-qwen25-coder-32b-${{ github.run_id }}
+  group: ai-agent-qwen25-coder-14b-${{ github.run_id }}
   cancel-in-progress: false
 
 jobs:
   agent:
-    runs-on: [self-hosted, linux, x64, ollama-32b]
-    timeout-minutes: 90
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
     outputs:
       run_dir: ${{ steps.meta.outputs.run_dir }}
       artifact_name: ${{ steps.meta.outputs.artifact_name }}
     env:
-      MODEL_ID: "qwen2.5-coder:32b"
-      MODEL_SLUG: "qwen25-coder-32b-local"
+      MODEL_ID: "qwen2.5-coder:14b-instruct-q4_K_S"
+      MODEL_SLUG: "qwen25-coder-14b-q4-k-s-local"
+      MODEL_QUANTIZATION: "Q4_K_S"
       PYTHONUNBUFFERED: "1"
+      OLLAMA_NUM_CTX: "512"
+      OLLAMA_NUM_PREDICT: "384"
+      OLLAMA_NUM_BATCH: "16"
     steps:
       - name: Checkout repository without persisted credentials
         uses: actions/checkout@v4
@@ -80,22 +93,130 @@ jobs:
               }, f, indent=2)
           PYMETA
         env:
-          RUN_DIR: outputs/agent_runs/${{ github.run_id }}-${{ github.run_attempt }}-qwen25-coder-32b-local
+          RUN_DIR: outputs/agent_runs/${{ github.run_id }}-${{ github.run_attempt }}-qwen25-coder-14b-q4-k-s-local
 
-      - name: Start local Ollama and pull the model
+      - name: Record hosted runner resources
         run: |
-          command -v ollama >/dev/null || { echo "Ollama must be installed on this self-hosted runner."; exit 1; }
-          if ! curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null; then
-            (OLLAMA_KEEP_ALIVE=0 ollama serve > "$RUNNER_TEMP/ollama-serve.log" 2>&1 &)
-            for i in $(seq 1 60); do
-              if curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null; then break; fi
+          echo "=== Memory ==="
+          free -h
+          echo "=== Disk ==="
+          df -h "$GITHUB_WORKSPACE"
+          echo "=== CPU ==="
+          nproc
+          echo "=== GPU availability ==="
+          if command -v nvidia-smi >/dev/null 2>&1; then nvidia-smi; else echo "No NVIDIA GPU exposed by this GitHub-hosted runner; Ollama will use CPU."; fi
+
+      - name: Save runner resource diagnostics
+        env:
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        run: |
+          python - <<'PYRESOURCE'
+          import json, os, shutil, subprocess
+          from pathlib import Path
+          mem = {}
+          try:
+              for line in Path("/proc/meminfo").read_text().splitlines():
+                  key, value = line.split(":", 1)
+                  if key in {"MemTotal", "MemAvailable", "SwapTotal", "SwapFree"}:
+                      mem[key] = int(value.strip().split()[0])
+          except Exception as exc:
+              mem["read_error"] = str(exc)
+          gpu = {"available": False, "details": "No NVIDIA GPU detected; standard hosted runner uses CPU inference."}
+          try:
+              result = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader"], text=True, capture_output=True, timeout=5, check=True)
+              gpu = {"available": True, "details": result.stdout.strip()}
+          except Exception:
+              pass
+          usage = shutil.disk_usage(os.environ["GITHUB_WORKSPACE"])
+          record = {
+              "cpu_count": os.cpu_count(),
+              "memory_kib": mem,
+              "workspace_disk_bytes": {"total": usage.total, "used": usage.used, "free": usage.free},
+              "gpu": gpu,
+              "runner_name": os.environ.get("RUNNER_NAME"),
+              "runner_os": os.environ.get("RUNNER_OS"),
+              "runner_arch": os.environ.get("RUNNER_ARCH"),
+          }
+          target = Path(os.environ["RUN_DIR"]) / "runner_resources.json"
+          target.write_text(json.dumps(record, indent=2), encoding="utf-8")
+          print(json.dumps(record, indent=2))
+          PYRESOURCE
+
+      - name: Install and start local Ollama daemon
+        id: ollama_setup
+        continue-on-error: true
+        env:
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        shell: bash
+        run: |
+          set +e
+          status=success
+          curl -fsSL https://ollama.com/install.sh -o "$RUNNER_TEMP/install-ollama.sh" 2> "$RUNNER_TEMP/ollama-install-stderr.log"
+          if [ $? -ne 0 ]; then
+            status=failure
+            echo "Ollama installer download failed" | tee "$RUN_DIR/ollama_setup_error.txt"
+          else
+            sh "$RUNNER_TEMP/install-ollama.sh" > "$RUN_DIR/ollama-install.log" 2>&1
+            if [ $? -ne 0 ]; then status=failure; fi
+          fi
+          if [ "$status" = success ]; then
+            ( env OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_KEEP_ALIVE=1m OLLAMA_CONTEXT_LENGTH=512 OLLAMA_NUM_BATCH=16 OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 ollama serve > "$RUNNER_TEMP/ollama-serve.log" 2>&1 & )
+            ready=0
+            for i in $(seq 1 45); do
+              if curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null; then ready=1; break; fi
               sleep 2
             done
+            if [ "$ready" -ne 1 ]; then status=failure; echo "Ollama daemon did not become ready" > "$RUN_DIR/ollama_setup_error.txt"; fi
           fi
-          curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null || { cat "$RUNNER_TEMP/ollama-serve.log" || true; exit 1; }
-          ollama pull "$MODEL_ID"
+          echo "status=$status" > "$RUN_DIR/ollama_setup_status.txt"
+          exit 0
+
+      - name: Pull quantized model with diagnostics
+        id: pull_model
+        continue-on-error: true
         env:
           MODEL_ID: ${{ env.MODEL_ID }}
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        shell: bash
+        run: |
+          set +e
+          if ! command -v ollama >/dev/null 2>&1; then
+            echo "ollama executable unavailable" > "$RUN_DIR/model_pull.log"
+            echo "status=failure" > "$RUN_DIR/model_pull_status.txt"
+            exit 0
+          fi
+          timeout 2400 ollama pull "$MODEL_ID" > "$RUN_DIR/model_pull.log" 2>&1
+          rc=$?
+          echo "exit_code=$rc" >> "$RUN_DIR/model_pull_status.txt"
+          if [ "$rc" -eq 0 ]; then echo "status=success" >> "$RUN_DIR/model_pull_status.txt"; else echo "status=failure" >> "$RUN_DIR/model_pull_status.txt"; fi
+          ollama list > "$RUN_DIR/ollama-list-after-pull.txt" 2>&1 || true
+          exit 0
+
+      - name: Verify model is available locally
+        id: model_check
+        if: always()
+        continue-on-error: true
+        env:
+          MODEL_ID: ${{ env.MODEL_ID }}
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        shell: bash
+        run: |
+          set +e
+          if command -v ollama >/dev/null 2>&1 && curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null; then
+            ollama show "$MODEL_ID" > "$RUN_DIR/model_check.log" 2>&1
+            rc=$?
+          else
+            echo "Ollama daemon or executable unavailable" > "$RUN_DIR/model_check.log"
+            rc=1
+          fi
+          if [ "$rc" -eq 0 ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "status=success" > "$RUN_DIR/model_check_status.txt"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "status=failure" > "$RUN_DIR/model_check_status.txt"
+          fi
+          exit 0
 
       - name: Install agent dependencies
         run: |
@@ -105,8 +226,50 @@ jobs:
       - name: Build isolated code-execution image
         run: docker build --file Dockerfile.agent-sandbox --tag collab-agent-sandbox:latest .
 
+      - name: Enable bounded disk-backed swap when storage permits
+        # Swap uses SSD storage, not GPU VRAM. It can prevent some OOM failures,
+        # but large-model inference may become much slower when pages are swapped.
+        env:
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        shell: bash
+        run: |
+          set -uo pipefail
+          status="$RUN_DIR/swap_status.txt"
+          {
+            echo "=== Before swap ==="
+            free -h
+            df -h "$GITHUB_WORKSPACE"
+            echo
+          } | tee "$status"
+          available_kb=$(df -Pk / | awk 'NR==2 {print $4}')
+          current_swap_kb=$(awk '/SwapTotal:/ {print $2}' /proc/meminfo)
+          if [ "${current_swap_kb:-0}" -ge 2097152 ]; then
+            echo "Existing swap is at least 2 GiB; leaving it unchanged." | tee -a "$status"
+          elif [ "${available_kb:-0}" -ge 3145728 ]; then
+            echo "Creating a 2 GiB temporary swapfile; this consumes SSD space." | tee -a "$status"
+            if (sudo fallocate -l 2G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none) \
+              && sudo chmod 600 /swapfile \
+              && sudo mkswap /swapfile >/dev/null \
+              && sudo swapon /swapfile; then
+              echo "swap_enabled=true" | tee -a "$status"
+            else
+              echo "swap_enabled=false (swapfile creation or activation failed)" | tee -a "$status"
+              sudo swapoff /swapfile 2>/dev/null || true
+              sudo rm -f /swapfile || true
+            fi
+          else
+            echo "swap_enabled=false (less than 3 GiB disk free; preserving model/runtime space)" | tee -a "$status"
+          fi
+          {
+            echo
+            echo "=== After swap attempt ==="
+            free -h
+            df -h "$GITHUB_WORKSPACE"
+          } | tee -a "$status"
+
       - name: Generate, execute, diagnose, and repair
         id: agent_run
+        if: ${{ always() && steps.model_check.outputs.available == 'true' }}
         continue-on-error: true
         env:
           MODEL_ID: ${{ env.MODEL_ID }}
@@ -114,6 +277,7 @@ jobs:
           RUN_DIR: ${{ steps.meta.outputs.run_dir }}
           MAX_REPAIRS: ${{ inputs.max_repairs }}
           EXECUTION_TIMEOUT: ${{ inputs.execution_timeout }}
+          MODEL_TIMEOUT: ${{ inputs.model_timeout }}
           AGENT_USE_DOCKER: "1"
           AGENT_SANDBOX_IMAGE: collab-agent-sandbox:latest
         run: |
@@ -121,7 +285,8 @@ jobs:
             --model "$MODEL_ID" \
             --run-dir "$RUN_DIR" \
             --max-repairs "$MAX_REPAIRS" \
-            --execution-timeout "$EXECUTION_TIMEOUT"
+            --execution-timeout "$EXECUTION_TIMEOUT" \
+            --api-timeout "$MODEL_TIMEOUT"
 
       - name: Record overall workflow result
         if: always()
@@ -136,6 +301,44 @@ jobs:
           with open(p, "w") as f:
               json.dump({"agent_step_outcome": os.environ.get("AGENT_OUTCOME", "not-run"), "recorded_at_utc": datetime.now(timezone.utc).isoformat()}, f, indent=2)
           PY
+
+      - name: Capture daemon and system diagnostics
+        if: always()
+        env:
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        shell: bash
+        run: |
+          set +e
+          [ -f "$RUNNER_TEMP/ollama-serve.log" ] && cp "$RUNNER_TEMP/ollama-serve.log" "$RUN_DIR/ollama-serve.log"
+          [ -f "$RUNNER_TEMP/ollama-install-stderr.log" ] && cp "$RUNNER_TEMP/ollama-install-stderr.log" "$RUN_DIR/ollama-install-stderr.log"
+          [ -f "$RUNNER_TEMP/ollama-install.sh" ] && sha256sum "$RUNNER_TEMP/ollama-install.sh" > "$RUN_DIR/ollama-installer-sha256.txt"
+          [ -f "$RUN_DIR/ollama_setup_status.txt" ] || echo "status=not_run" > "$RUN_DIR/ollama_setup_status.txt"
+          [ -f "$RUN_DIR/model_pull_status.txt" ] || echo "status=not_run" > "$RUN_DIR/model_pull_status.txt"
+          free -b > "$RUN_DIR/final-free-memory.txt" 2>&1
+          df -h "$GITHUB_WORKSPACE" > "$RUN_DIR/final-disk.txt" 2>&1
+          (ollama ps > "$RUN_DIR/ollama-ps.txt" 2>&1) || true
+          (docker image ls > "$RUN_DIR/docker-images.txt" 2>&1) || true
+
+      - name: Build analysis-first artifact report
+        if: always()
+        env:
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+          MODEL_ID: ${{ env.MODEL_ID }}
+          MODEL_QUANTIZATION: ${{ env.MODEL_QUANTIZATION || 'quantized Ollama model' }}
+          OLLAMA_NUM_CTX: ${{ env.OLLAMA_NUM_CTX }}
+          OLLAMA_NUM_PREDICT: ${{ env.OLLAMA_NUM_PREDICT }}
+          OLLAMA_NUM_BATCH: ${{ env.OLLAMA_NUM_BATCH }}
+        run: |
+          python scripts/finalize_agent_report.py --run-dir "$RUN_DIR"
+
+      - name: Capture Ollama daemon logs
+        if: always()
+        env:
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        run: |
+          if [ -f "$RUNNER_TEMP/ollama-serve.log" ]; then
+            cp "$RUNNER_TEMP/ollama-serve.log" "$RUN_DIR/ollama-serve.log"
+          fi
 
       - name: Upload model run, notebook, audit trail, and logs
         if: always()
@@ -191,6 +394,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No output changes to commit."
           else
-            git commit -m "experiment: save qwen25-coder-32b-local run ${{ github.run_id }} [skip ci]"
+            git commit -m "experiment: save qwen25-coder-14b-q4-k-s-local run ${{ github.run_id }} [skip ci]"
             git push
           fi

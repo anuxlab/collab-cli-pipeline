@@ -1,2 +1,0 @@
-run_folder,model,status,attempts_used,max_repairs,accuracy,precision,recall,f1,test_samples,execution_seconds,started_at_utc,finished_at_utc
-40926952429-1-qwen25-coder-7b-local,qwen2.5-coder:7b,passed,1,2,0.986013986013986,0.9888888888888889,0.9888888888888889,0.9888888888888889,143,1.752,2026-10-29T18:03:30.988479+00:00,2026-10-29T18:04:54.835026+00:00

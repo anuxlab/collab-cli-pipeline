@@ -50,7 +50,13 @@ def call_model(model: str, messages: list[dict], timeout: int, base_url: str | N
                 "model": model,
                 "messages": messages,
                 "stream": False,
-                "options": {"temperature": 0.1, "num_predict": 2500},
+                # Small context and batch reduce RAM pressure on CPU-only hosted runners.
+                "options": {
+                    "temperature": 0.1,
+                    "num_ctx": int(os.environ.get("OLLAMA_NUM_CTX", "2048")),
+                    "num_predict": int(os.environ.get("OLLAMA_NUM_PREDICT", "1400")),
+                    "num_batch": int(os.environ.get("OLLAMA_NUM_BATCH", "128")),
+                },
             },
             timeout=timeout,
         )

@@ -1,5 +1,11 @@
 __pycache__/
 .pytest_cache/
-.ipynb_checkpoints/
+*.py[cod]
 .venv/
-*.pyc
+venv/
+.env
+outputs/*
+!outputs/.gitkeep
+!outputs/agent_runs/
+outputs/agent_runs/*
+!outputs/agent_runs/.gitkeep
