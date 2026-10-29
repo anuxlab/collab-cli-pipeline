@@ -83,36 +83,32 @@ This prototype runs fixed, reviewed benchmark code; it does not yet ask an LLM t
 - Timing values vary by runner load and software versions.
 - Model comparison is an engineering smoke test, not a statistically powered model-selection study.
 
-## AI coding-agent experiments (manual-only, separate workflows)
+## AI coding-agent experiments (manual-only, local inference)
 
-The original **Collab CLI Experiment Pipeline** remains in place. Three additional workflows run separate model experiments, so runs can be compared independently:
+The original **Collab CLI Experiment Pipeline** and conventional ML benchmark remain in place. Three additional workflows test models through **Ollama running on the runner**. They do not call Hugging Face Inference Providers, OpenAI, or another hosted inference endpoint, and do not require `HF_TOKEN`.
 
-| Workflow in Actions | Model tested | Workflow file |
-|---|---|---|
-| AI Agent Experiment — Qwen2.5-Coder 7B | `Qwen/Qwen2.5-Coder-7B-Instruct` | `.github/workflows/agent-qwen-coder-7b.yml` |
-| AI Agent Experiment — Qwen2.5-Coder 32B | `Qwen/Qwen2.5-Coder-32B-Instruct` | `.github/workflows/agent-qwen-coder-32b.yml` |
-| AI Agent Experiment — DeepSeek-Coder-V2-Lite | `deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct` | `.github/workflows/agent-deepseek-coder.yml` |
+| Workflow in Actions | Model served locally by Ollama | Runner requirement | Workflow file |
+|---|---|---|---|
+| Local AI Agent Experiment — Qwen2.5-Coder 7B (Ollama) | `qwen2.5-coder:7b` | GitHub-hosted Ubuntu runner; model memory use may be close to runner limits | `.github/workflows/agent-qwen-coder-7b.yml` |
+| Local AI Agent Experiment — Qwen2.5-Coder 32B (Ollama) | `qwen2.5-coder:32b` | Self-hosted Linux x64 runner labelled `ollama-32b`, with Ollama installed and sufficient RAM/VRAM. A quantized 32B model typically needs a machine with at least around 32 GB RAM; more is preferable. | `.github/workflows/agent-qwen-coder-32b.yml` |
+| Local AI Agent Experiment — DeepSeek-Coder-V2-Lite (Ollama) | `deepseek-coder-v2:16b` | Self-hosted Linux x64 runner labelled `ollama-deepseek`, with Ollama installed and sufficient RAM/VRAM. | `.github/workflows/agent-deepseek-coder.yml` |
 
-All three use only `workflow_dispatch`: **no push, pull-request, or scheduled trigger**. Each run has a unique path based on run ID, attempt, and model slug. This preserves experiment history instead of overwriting previous model outputs.
+All three use only `workflow_dispatch`: **no push, pull-request, or scheduled trigger**. Each run has a unique path based on run ID, attempt, and model slug, preserving history instead of overwriting previous experiment outputs.
 
-### Configure Hugging Face
+### Local inference and runner setup
 
-1. In the GitHub repository, open **Settings → Secrets and variables → Actions**.
-2. Add a repository secret named **`HF_TOKEN`** with a Hugging Face token that has permission to use Inference Providers.
-3. Open **Actions**, choose one of the three AI Agent Experiment workflows, and click **Run workflow**.
-4. Choose 0, 1, or 2 repair attempts and an execution timeout.
+- On the GitHub-hosted 7B workflow, Ollama is installed during the manually triggered run, model weights are downloaded to the runner, and inference is served by `http://127.0.0.1:11434`.
+- The 32B and DeepSeek-Coder-V2-Lite workflows use self-hosted runners because standard GitHub-hosted runners do not have enough memory for those model sizes. Register your own Linux x64 machine as a GitHub Actions self-hosted runner and add the matching custom label (`ollama-32b` or `ollama-deepseek`). Install Ollama and ensure the runner account can execute `ollama`.
+- Model downloads require outbound internet access to fetch public weights, but **prompts and inference requests are sent to the local Ollama daemon**. No inference-provider account or `HF_TOKEN` is used.
+- Open **Actions**, choose one local AI Agent Experiment workflow, and click **Run workflow**. Choose 0, 1, or 2 repair attempts and an execution timeout.
 
-The model IDs use Hugging Face's OpenAI-compatible Inference Providers router. Availability depends on current provider support, account access, and model/provider capacity. A model can fail before code generation if no provider currently serves it; that failure is retained in the audit output and is not counted as a model coding failure.
+### Agent loop and safety
 
-### Agent loop
-
-Each workflow performs initial code generation → isolated subprocess execution → diagnostics/metric validation → up to two repair attempts. The test task trains a deterministic scikit-learn binary classifier and requires a JSON metrics object. Every run saves a generated notebook, initial/final code when available, per-attempt stdout/stderr, repair patch, JSON audit, summary, metadata, and workflow status.
-
-Run outputs are uploaded as 90-day GitHub Actions artifacts and copied into a unique repository folder such as `outputs/agent_runs/<run-id>-<attempt>-qwen25-coder-7b/`. The persistence job is separate from the model job: the model job has read-only repository permissions and does not retain checkout credentials; only the persistence job has `contents: write`. Generated code is executed in a Docker container with network disabled, memory/CPU/PID limits, a read-only root filesystem, dropped Linux capabilities, and only the temporary workspace mounted. The model job does not retain checkout credentials and the generated-code container receives no secrets. The local test fallback uses a reduced-environment subprocess and is not a hardened sandbox. Do not place private data or secrets in the execution workspace.
+Each workflow generates Python code, executes it in a Docker container with networking disabled and resource limits, diagnoses errors and invalid metrics, and permits at most two repairs. It saves generated scripts, a generated notebook, per-attempt stdout/stderr, `audit.json`, `summary.json`, and `repair.patch`. Model inference stays outside the generated-code container; the container receives no inference credentials. The model job has read-only repository permissions; a separate persistence job writes the run record and refreshes the comparison report. Do not place private data or secrets in prompts or the execution workspace.
 
 ### Comparing model runs
 
-Compare each run's `summary.json`, `audit.json`, `repair.patch`, and stdout/stderr files. Key fields include final status, attempts used, validation result, duration, and classification metrics. Compare runs for the same task and similar timeout/repair settings. The model workflow may fail due to provider availability, quota, authorization, or model output quality; use the saved diagnostics to distinguish these.
+Compare each run's `summary.json`, `audit.json`, `repair.patch`, and stdout/stderr files. The comparison report is stored in `outputs/agent_runs/comparison.csv` and `outputs/agent_runs/comparison.md`. Compare models on the same task, timeout, and repair budget. A model run may fail because of model download, runner memory, Ollama startup, execution, or code quality; inspect retained logs to distinguish these cases.
 
 ### Local tests
 
@@ -121,5 +117,5 @@ pip install -r requirements.txt
 pytest -q
 ```
 
-The unit tests validate code-fence extraction, metric validation, and that the generated-code subprocess does not inherit `HF_TOKEN`. They do not call a live model API. Live model experiments must be manually started in GitHub Actions.
+The unit tests validate code extraction, metric validation, credential isolation, and local Ollama request handling using a mocked response. They do not download model weights or run live inference. Model experiments must be manually started in GitHub Actions.
 

@@ -54,3 +54,27 @@ def test_comparison_report_collects_saved_summaries(tmp_path, monkeypatch):
     assert len(rows) == 1
     assert rows[0]["model"] == "test/model"
     assert rows[0]["accuracy"] == 0.9
+
+
+def test_local_ollama_chat_request(monkeypatch):
+    from scripts import agent_experiment
+
+    class FakeResponse:
+        ok = True
+        def json(self):
+            return {"message": {"content": "print('local')"}}
+
+    captured = {}
+    def fake_post(url, json, timeout):
+        captured.update(url=url, body=json, timeout=timeout)
+        return FakeResponse()
+
+    monkeypatch.setattr(agent_experiment.requests, "post", fake_post)
+    result = agent_experiment.call_model(
+        "qwen2.5-coder:3b", [{"role": "user", "content": "write code"}], 42,
+        "http://127.0.0.1:11434/",
+    )
+    assert result == "print('local')"
+    assert captured["url"] == "http://127.0.0.1:11434/api/chat"
+    assert captured["body"]["model"] == "qwen2.5-coder:3b"
+    assert captured["body"]["stream"] is False

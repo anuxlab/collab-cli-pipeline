@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate, execute, diagnose and repair a small ML script using HF Inference Providers.
+"""Generate, execute, diagnose and repair code using a local Ollama model.
 
-Generated code is executed in a separate process with a reduced environment. This is
-credential isolation, not a hardened security sandbox; never use it for untrusted secrets.
+Inference is sent only to the Ollama HTTP endpoint on the runner (default localhost).
+Generated code is executed separately in a reduced environment or Docker sandbox.
 """
 from __future__ import annotations
 import argparse
@@ -27,7 +27,7 @@ on stdout containing dataset, model, accuracy, precision, recall, f1, and test_s
 numeric and accuracy must be between 0.85 and 1.0. Use only installed packages (numpy and sklearn).
 Do not read files except your own working directory, do not use the network, and do not access environment
 variables. Include basic validation and exit nonzero if the metrics are invalid. Return only executable Python code."""
-API_URL = "https://router.huggingface.co/v1/chat/completions"
+DEFAULT_OLLAMA_URL = "http://127.0.0.1:11434"
 
 
 def extract_code(text: str) -> str:
@@ -40,21 +40,32 @@ def extract_code(text: str) -> str:
     return code + "\n"
 
 
-def call_model(model: str, token: str, messages: list[dict], timeout: int) -> str:
-    response = requests.post(
-        API_URL,
-        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
-        json={"model": model, "messages": messages, "temperature": 0.1, "max_tokens": 2500},
-        timeout=timeout,
-    )
+def call_model(model: str, messages: list[dict], timeout: int, base_url: str | None = None) -> str:
+    """Call a model served by the local Ollama daemon; no hosted inference API or token."""
+    base_url = (base_url or os.environ.get("OLLAMA_BASE_URL") or DEFAULT_OLLAMA_URL).rstrip("/")
+    try:
+        response = requests.post(
+            f"{base_url}/api/chat",
+            json={
+                "model": model,
+                "messages": messages,
+                "stream": False,
+                "options": {"temperature": 0.1, "num_predict": 2500},
+            },
+            timeout=timeout,
+        )
+    except requests.RequestException as exc:
+        raise RuntimeError(
+            f"Local Ollama request failed at {base_url}. Ensure Ollama is running and model '{model}' is pulled. "
+            f"Details: {type(exc).__name__}: {str(exc)[:800]}"
+        ) from exc
     if not response.ok:
-        # Avoid persisting request headers/token. Response bodies may contain provider diagnostics.
-        raise RuntimeError(f"Inference API HTTP {response.status_code}: {response.text[:1200]}")
+        raise RuntimeError(f"Local Ollama HTTP {response.status_code}: {response.text[:1200]}")
     data = response.json()
     try:
-        return data["choices"][0]["message"]["content"]
-    except (KeyError, IndexError, TypeError) as exc:
-        raise RuntimeError(f"Unexpected inference response: {json.dumps(data)[:1200]}") from exc
+        return data["message"]["content"]
+    except (KeyError, TypeError) as exc:
+        raise RuntimeError(f"Unexpected local Ollama response: {json.dumps(data)[:1200]}") from exc
 
 
 def execute_code(code: str, workdir: Path, timeout: int) -> dict:
@@ -146,12 +157,9 @@ def main() -> int:
     parser.add_argument("--run-dir", required=True)
     parser.add_argument("--max-repairs", type=int, default=2)
     parser.add_argument("--execution-timeout", type=int, default=60)
-    parser.add_argument("--api-timeout", type=int, default=180)
+    parser.add_argument("--api-timeout", "--model-timeout", dest="api_timeout", type=int, default=300)
+    parser.add_argument("--ollama-url", default=os.environ.get("OLLAMA_BASE_URL", DEFAULT_OLLAMA_URL))
     args = parser.parse_args()
-    token = os.environ.get("HF_TOKEN", "").strip()
-    if not token:
-        print("HF_TOKEN is required (repository Actions secret).", file=sys.stderr)
-        return 2
     if not 0 <= args.max_repairs <= 2:
         print("--max-repairs must be between 0 and 2", file=sys.stderr)
         return 2
@@ -173,7 +181,7 @@ def main() -> int:
     for attempt in range(args.max_repairs + 1):
         started_at = datetime.now(timezone.utc).isoformat()
         try:
-            response = call_model(args.model, token, messages, args.api_timeout)
+            response = call_model(args.model, messages, args.api_timeout, args.ollama_url)
             code = extract_code(response)
             if attempt == 0:
                 initial_code = code
@@ -227,7 +235,7 @@ def main() -> int:
         diff = difflib.unified_diff(initial_code.splitlines(True), final_code.splitlines(True), fromfile="initial_solution.py", tofile="generated_solution.py")
         (run_dir / "repair.patch").write_text("".join(diff), encoding="utf-8")
     summary = {
-        "experiment": "ai_notebook_code_repair", "model": args.model, "status": status,
+        "experiment": "ai_notebook_code_repair", "model": args.model, "inference_backend": "local_ollama", "ollama_url": args.ollama_url, "status": status,
         "max_repairs": args.max_repairs, "attempts_used": len(audit),
         "started_at_utc": audit[0]["started_at_utc"] if audit else datetime.now(timezone.utc).isoformat(),
         "finished_at_utc": datetime.now(timezone.utc).isoformat(),

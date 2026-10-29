@@ -1,4 +1,4 @@
-name: AI Agent Experiment — Qwen2.5-Coder 32B
+name: Local AI Agent Experiment — Qwen2.5-Coder 32B (Ollama)
 
 # Deliberately manual-only. Do not add push, pull_request, or schedule triggers.
 on:
@@ -32,14 +32,14 @@ concurrency:
 
 jobs:
   agent:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
+    runs-on: [self-hosted, linux, x64, ollama-32b]
+    timeout-minutes: 90
     outputs:
       run_dir: ${{ steps.meta.outputs.run_dir }}
       artifact_name: ${{ steps.meta.outputs.artifact_name }}
     env:
-      MODEL_ID: "Qwen/Qwen2.5-Coder-32B-Instruct"
-      MODEL_SLUG: "qwen25-coder-32b"
+      MODEL_ID: "qwen2.5-coder:32b"
+      MODEL_SLUG: "qwen25-coder-32b-local"
       PYTHONUNBUFFERED: "1"
     steps:
       - name: Checkout repository without persisted credentials
@@ -80,7 +80,22 @@ jobs:
               }, f, indent=2)
           PYMETA
         env:
-          RUN_DIR: outputs/agent_runs/${{ github.run_id }}-${{ github.run_attempt }}-qwen25-coder-32b
+          RUN_DIR: outputs/agent_runs/${{ github.run_id }}-${{ github.run_attempt }}-qwen25-coder-32b-local
+
+      - name: Start local Ollama and pull the model
+        run: |
+          command -v ollama >/dev/null || { echo "Ollama must be installed on this self-hosted runner."; exit 1; }
+          if ! curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null; then
+            (OLLAMA_KEEP_ALIVE=0 ollama serve > "$RUNNER_TEMP/ollama-serve.log" 2>&1 &)
+            for i in $(seq 1 60); do
+              if curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null; then break; fi
+              sleep 2
+            done
+          fi
+          curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null || { cat "$RUNNER_TEMP/ollama-serve.log" || true; exit 1; }
+          ollama pull "$MODEL_ID"
+        env:
+          MODEL_ID: ${{ env.MODEL_ID }}
 
       - name: Install agent dependencies
         run: |
@@ -94,8 +109,8 @@ jobs:
         id: agent_run
         continue-on-error: true
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
           MODEL_ID: ${{ env.MODEL_ID }}
+          OLLAMA_BASE_URL: http://127.0.0.1:11434
           RUN_DIR: ${{ steps.meta.outputs.run_dir }}
           MAX_REPAIRS: ${{ inputs.max_repairs }}
           EXECUTION_TIMEOUT: ${{ inputs.execution_timeout }}
@@ -176,6 +191,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No output changes to commit."
           else
-            git commit -m "experiment: save qwen25-coder-32b run ${{ github.run_id }} [skip ci]"
+            git commit -m "experiment: save qwen25-coder-32b-local run ${{ github.run_id }} [skip ci]"
             git push
           fi
