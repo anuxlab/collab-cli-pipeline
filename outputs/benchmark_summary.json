@@ -1,0 +1,33 @@
+{
+  "status": "success",
+  "suite": "extended",
+  "dataset_count": 3,
+  "model_count": 4,
+  "experiment_count": 12,
+  "cv_folds": 5,
+  "random_state": 42,
+  "datasets": {
+    "iris": {
+      "n_samples": 150,
+      "n_features": 4,
+      "n_classes": 3,
+      "best_model_by_f1": "SVC_RBF",
+      "best_f1_weighted": 0.9473684210526315
+    },
+    "wine": {
+      "n_samples": 178,
+      "n_features": 13,
+      "n_classes": 3,
+      "best_model_by_f1": "LogisticRegression",
+      "best_f1_weighted": 1.0
+    },
+    "breast_cancer": {
+      "n_samples": 569,
+      "n_features": 30,
+      "n_classes": 2,
+      "best_model_by_f1": "LogisticRegression",
+      "best_f1_weighted": 0.986013986013986
+    }
+  },
+  "generated_at_utc": "2026-10-29T17:06:57.099755+00:00"
+}
