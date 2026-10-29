@@ -1,43 +1,84 @@
-# Collab CLI + Notebook CI prototype
+# Collab CLI Experiment Pipeline (scaled prototype)
 
-This repository scaffold tests a repeatable notebook execution flow on a GitHub Actions runner. It begins with a deterministic scikit-learn ML pipeline so the execution, output collection, validation, artifact upload, and git commit path can be verified before wiring in an actual Collab CLI command or model agent.
+A manually triggered GitHub Actions pipeline for repeatable ML experiments, notebook execution, output validation, artifact retention, and committing results back to this repository.
 
-## What the workflow does
+## Manual runs only
 
-1. Runs on manual dispatch or relevant pushes to `main`/`master`.
-2. Installs Python dependencies on an Ubuntu runner.
-3. Optionally invokes a configured Collab CLI command.
-4. Executes `notebooks/ml_pipeline.ipynb` with `nbconvert`.
-5. Writes `outputs/ml_summary.json` and `outputs/feature_importance.csv`.
-6. Validates the summary and executed notebook for execution errors.
-7. Uploads outputs as a GitHub Actions artifact and commits generated outputs back to the repository.
+This workflow intentionally uses **only** `workflow_dispatch`. It does not run on pushes, pull requests, schedules, or releases. Existing files are retained unless a same-path file needed an update for the expanded pipeline.
 
-## Setup
+1. Open **Actions → Collab CLI Experiment Pipeline**.
+2. Click **Run workflow**.
+3. Select `smoke` for a fast one-dataset check or `extended` for the full benchmark.
+4. Choose whether to execute the report notebook and run unit tests. The original Iris notebook always runs; the report notebook can be skipped.
+5. Inspect the run logs and download the artifacts. On success, generated outputs are committed to the selected branch.
 
-1. Copy these files into your repository (or use this scaffold as a starter repo).
-2. Ensure the workflow's branch list matches your default branch.
-3. In **Settings → Actions → General → Workflow permissions**, allow read/write repository permissions. The workflow also declares `contents: write`.
-4. Run **Actions → Collab CLI Notebook Pipeline → Run workflow**.
-5. Check the workflow logs, artifact, and committed `outputs/` files.
+The repository must allow GitHub Actions to write contents. The workflow uses `contents: write` and the built-in `GITHUB_TOKEN`.
 
-## Collab CLI integration
+## What is being tested
 
-The exact CLI package and command have not yet been specified, so the integration step is intentionally optional. After confirming the CLI installation and invocation, set a repository variable named `COLLAB_CLI_COMMAND` to the command (not a secret). If authentication is needed, pass credentials through GitHub Actions secrets and the CLI's documented environment variables; never hard-code tokens in the notebook, command, or committed output. If the CLI is not preinstalled on `ubuntu-latest`, add its official installation step before the optional command.
+The original `notebooks/ml_pipeline.ipynb` and its output checks are retained and executed on each manual run. The optional `scripts/run_collab_cli.sh` hook is also retained; it runs only when the repository variable `COLLAB_CLI_COMMAND` is configured.
 
-The current integration hook captures stdout/stderr to `outputs/collab_cli.log`. If the CLI produces notebooks or other files, add their paths to validation and artifact collection, and only commit files that are safe to keep in the repository.
+The benchmark uses local scikit-learn datasets (no external data download) and four models:
+- Standard-scaled Logistic Regression
+- Random Forest
+- RBF Support Vector Classifier
+- Histogram Gradient Boosting
 
-## Why this starts without Qwen
+Datasets:
+- Iris (3-class)
+- Wine (3-class)
+- Breast Cancer Wisconsin (binary)
 
-Running a local Qwen model on a standard GitHub-hosted CPU runner can be slow and memory-constrained, and downloading weights on every run wastes time. First validate the notebook and persistence loop. Then add an agent as a separate optional job, ideally using a small quantized model with a cache or a hosted inference endpoint. Keep generated code execution sandboxed and time-limited, and do not give an agent repository write credentials inside its execution process.
+The `smoke` suite runs Iris with 3-fold cross-validation. The `extended` suite runs all three datasets with 5-fold cross-validation. All splits and model random states are seeded for repeatability.
 
-## Output files
+Metrics include holdout accuracy, balanced accuracy, weighted precision/recall/F1, ROC AUC, cross-validation accuracy mean/std, and fit/prediction duration. The pipeline also saves confusion matrices and classification reports.
 
-- `outputs/ml_summary.json` — run timestamp, dataset, accuracy, and split sizes.
-- `outputs/feature_importance.csv` — permutation feature importance.
-- `outputs/collab_cli.log` — only created when the optional CLI command runs.
-- `notebooks/ml_pipeline_executed.ipynb` — notebook with cell outputs saved.
+## Output artifacts
 
+- `outputs/benchmark_summary.json` — compact run summary and best model per dataset
+- `outputs/benchmark_details.json` — per-model confusion matrices and classification reports
+- `outputs/benchmark_metrics.csv` — one row per dataset/model combination
+- `outputs/f1_comparison.png` — weighted F1 comparison chart
+- `outputs/cv_accuracy_comparison.png` — cross-validation comparison chart
+- `outputs/run_metadata.json` — runner, commit, run and suite metadata
+- `notebooks/experiment_report_executed.ipynb` — executed benchmark report notebook with captured outputs
+- `notebooks/ml_pipeline_executed.ipynb` — original Iris notebook with captured outputs
+- `outputs/ml_summary.json` and `outputs/feature_importance.csv` — retained outputs from the original Iris pipeline
+- `outputs/collab_cli.log` — optional CLI stdout/stderr log
 
-## Workflow trigger policy
+Artifacts are also uploaded to the Actions run for 30 days.
 
-This workflow is **manual-run only**. It uses `workflow_dispatch` and does not run automatically on pushes or pull requests. In GitHub, open **Actions → Collab CLI Notebook Pipeline → Run workflow** to start a run. Generated outputs are still committed back to the repository by the workflow when the run succeeds and repository write permissions are enabled.
+## Run locally
+
+```bash
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\\Scripts\\activate
+pip install -r requirements.txt
+pytest -q
+BENCHMARK_SUITE=smoke python scripts/run_benchmark.py
+python scripts/validate_outputs.py
+```
+
+To run the extended benchmark locally:
+
+```bash
+BENCHMARK_SUITE=extended python scripts/run_benchmark.py
+python scripts/validate_outputs.py
+```
+
+To execute the report notebook locally (the workflow also always executes the original Iris notebook):
+
+```bash
+MPLBACKEND=Agg jupyter nbconvert --to notebook --execute notebooks/experiment_report.ipynb --output experiment_report_executed.ipynb --output-dir notebooks
+```
+
+## Safety and boundaries
+
+This prototype runs fixed, reviewed benchmark code; it does not yet ask an LLM to write or execute arbitrary code. Do not expose repository write tokens to an AI-generated-code process. The next stage can add a separately gated Qwen agent job with bounded retries, timeouts, patch review, and generated notebook validation. Actual Collab CLI commands should be integrated only after confirming the CLI package and invocation syntax.
+
+## Known limitations
+
+- These are small built-in demonstration datasets, not evidence of production generalization.
+- Cross-validation uses the full dataset independently of the holdout split for model comparison; report the held-out metrics separately from CV metrics.
+- Timing values vary by runner load and software versions.
+- Model comparison is an engineering smoke test, not a statistically powered model-selection study.

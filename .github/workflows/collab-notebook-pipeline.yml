@@ -1,20 +1,42 @@
-name: Collab CLI Notebook Pipeline
+name: Collab CLI Experiment Pipeline
 
 on:
-  # Manual runs only. Do not trigger on pushes or pull requests.
   workflow_dispatch:
+    inputs:
+      benchmark_suite:
+        description: "Experiment size"
+        type: choice
+        required: true
+        default: extended
+        options:
+          - smoke
+          - extended
+      execute_notebook:
+        description: "Execute and save the experiment notebook"
+        type: boolean
+        required: true
+        default: true
+      run_tests:
+        description: "Run pipeline unit tests"
+        type: boolean
+        required: true
+        default: true
 
 permissions:
   contents: write
 
 concurrency:
-  group: collab-notebook-${{ github.ref }}
+  group: collab-experiment-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  execute-notebook:
+  benchmark:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
+    env:
+      BENCHMARK_SUITE: ${{ inputs.benchmark_suite }}
+      MPLBACKEND: Agg
+      PYTHONUNBUFFERED: "1"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,24 +46,51 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
           cache: pip
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
-        run: python -m pip install --upgrade pip && pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Prepare output directory
-        run: mkdir -p outputs
+      - name: Record run metadata
+        run: |
+          mkdir -p outputs
+          python - <<'PY'
+          import json, os, platform
+          from datetime import datetime, timezone
+          metadata = {
+              "run_id": os.getenv("GITHUB_RUN_ID", "local"),
+              "run_number": os.getenv("GITHUB_RUN_NUMBER", "local"),
+              "commit_sha": os.getenv("GITHUB_SHA", "local"),
+              "ref": os.getenv("GITHUB_REF", "local"),
+              "suite": os.getenv("BENCHMARK_SUITE", "extended"),
+              "python": platform.python_version(),
+              "platform": platform.platform(),
+              "started_at_utc": datetime.now(timezone.utc).isoformat(),
+          }
+          with open("outputs/run_metadata.json", "w") as f:
+              json.dump(metadata, f, indent=2)
+          PY
 
-      # Integration point: set COLLAB_CLI_COMMAND as a repository variable only after
-      # confirming the actual CLI syntax. Do not put credentials in this variable.
+      # Optional integration hook retained from the original pipeline. Configure only
+      # after confirming the real Collab CLI command and its installation steps.
       - name: Run optional Collab CLI command
         if: ${{ vars.COLLAB_CLI_COMMAND != '' }}
         env:
           COLLAB_CLI_COMMAND: ${{ vars.COLLAB_CLI_COMMAND }}
         run: bash scripts/run_collab_cli.sh
 
-      - name: Execute ML notebook
+      - name: Run unit tests
+        if: ${{ inputs.run_tests }}
+        run: pytest -q
+
+      - name: Run benchmark suite
+        run: python scripts/run_benchmark.py
+
+      - name: Execute original ML pipeline notebook
         run: |
           jupyter nbconvert \
             --to notebook \
@@ -50,28 +99,47 @@ jobs:
             --output-dir notebooks \
             --ExecutePreprocessor.timeout=600
 
-      - name: Validate generated outputs
+      - name: Execute experiment notebook
+        if: ${{ inputs.execute_notebook }}
+        run: |
+          jupyter nbconvert \
+            --to notebook \
+            --execute notebooks/experiment_report.ipynb \
+            --output experiment_report_executed.ipynb \
+            --output-dir notebooks \
+            --ExecutePreprocessor.timeout=900
+        env:
+          BENCHMARK_SUITE: ${{ inputs.benchmark_suite }}
+          MPLBACKEND: Agg
+
+      - name: Validate all generated outputs
         run: python scripts/validate_outputs.py
 
-      - name: Upload run artifacts
+      - name: Upload results and logs
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: collab-cli-ml-run-${{ github.run_number }}
+          name: collab-experiment-run-${{ github.run_number }}
           path: |
             outputs/
             notebooks/ml_pipeline_executed.ipynb
-          if-no-files-found: error
+            notebooks/experiment_report_executed.ipynb
+            outputs/collab_cli.log
+          if-no-files-found: warn
           retention-days: 30
 
-      - name: Commit outputs back to repository
-        if: ${{ success() && github.event_name != 'pull_request' }}
+      - name: Commit experiment outputs
+        if: ${{ success() }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add outputs/ notebooks/ml_pipeline_executed.ipynb
+          git add -f outputs/
+          if [ -f notebooks/ml_pipeline_executed.ipynb ]; then git add -f notebooks/ml_pipeline_executed.ipynb; fi
+          if [ -f notebooks/experiment_report_executed.ipynb ]; then git add -f notebooks/experiment_report_executed.ipynb; fi
+          if [ -f outputs/collab_cli.log ]; then git add -f outputs/collab_cli.log; fi
           if git diff --cached --quiet; then
-            echo "No output changes to commit."
+            echo "No generated output changes to commit."
           else
-            git commit -m "ci: save Collab CLI notebook run outputs [skip ci]"
+            git commit -m "experiment: save $BENCHMARK_SUITE benchmark results [skip ci]"
             git push
           fi
