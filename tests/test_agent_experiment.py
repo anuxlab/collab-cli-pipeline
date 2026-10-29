@@ -79,5 +79,5 @@ def test_local_ollama_chat_request(monkeypatch):
     assert captured["body"]["model"] == "qwen2.5-coder:3b"
     assert captured["body"]["stream"] is False
     assert captured["body"]["options"]["num_ctx"] == 2048
-    assert captured["body"]["options"]["num_predict"] == 1400
-    assert captured["body"]["options"]["num_batch"] == 128
+    assert captured["body"]["options"]["num_predict"] == 1200
+    assert captured["body"]["options"]["num_batch"] == 16

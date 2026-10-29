@@ -98,7 +98,7 @@ def main():
       for x in log_files:
         lines += [f"### `{x['file']}` ({x['lines']} lines, {x['bytes']} bytes)",'```text',x['tail'] or '(empty)','```','']
     else: lines += ['No supplemental text logs were found.','']
-    lines += ['## Files in this artifact','', 'See `analysis.json` for structured diagnostics, `summary.json` and `audit.json` for agent-level results, `generated_notebook.ipynb` and `generated_attempt_*.py` for generated artifacts, and `ollama-serve.log` / `model_pull.log` for detailed runtime evidence.','']
+    lines += ['## Files in this artifact','', 'See `analysis.json` for structured diagnostics, `summary.json` and `audit.json` for agent-level results, `graph_trace.json` for LangGraph node transitions, `generated_notebook.ipynb` and `generated_attempt_*.py` for generated artifacts, and `ollama-serve.log` / `model_pull.log` for detailed runtime evidence.','']
     (d/'analysis_report.md').write_text('\n'.join(lines),encoding='utf-8')
     # Manifest written last so the artifact can be inventoried without external tools.
     manifest=[]

@@ -54,8 +54,8 @@ def call_model(model: str, messages: list[dict], timeout: int, base_url: str | N
                 "options": {
                     "temperature": 0.1,
                     "num_ctx": int(os.environ.get("OLLAMA_NUM_CTX", "2048")),
-                    "num_predict": int(os.environ.get("OLLAMA_NUM_PREDICT", "1400")),
-                    "num_batch": int(os.environ.get("OLLAMA_NUM_BATCH", "128")),
+                    "num_predict": int(os.environ.get("OLLAMA_NUM_PREDICT", "1200")),
+                    "num_batch": int(os.environ.get("OLLAMA_NUM_BATCH", "16")),
                 },
             },
             timeout=timeout,
@@ -75,9 +75,11 @@ def call_model(model: str, messages: list[dict], timeout: int, base_url: str | N
 
 
 def execute_code(code: str, workdir: Path, timeout: int) -> dict:
+    """Execute a candidate with per-attempt Docker identity and guaranteed cleanup."""
+    import uuid
+
     script = workdir / "generated_solution.py"
     script.write_text(code, encoding="utf-8")
-    # Do not pass HF_TOKEN, GITHUB_TOKEN, or any other parent process environment variables.
     safe_env = {
         "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
         "HOME": str(workdir),
@@ -88,9 +90,11 @@ def execute_code(code: str, workdir: Path, timeout: int) -> dict:
     }
     started = time.monotonic()
     use_docker = os.environ.get("AGENT_USE_DOCKER", "0") == "1"
-    cidfile = workdir / "agent-container.cid"
+    # Never reuse a cidfile across attempts: stale files make docker run fail before execution.
+    cidfile = workdir / f"agent-container-{uuid.uuid4().hex}.cid"
+    container_id = ""
+    image = os.environ.get("AGENT_SANDBOX_IMAGE", "collab-agent-sandbox:latest")
     if use_docker:
-        image = os.environ.get("AGENT_SANDBOX_IMAGE", "collab-agent-sandbox:latest")
         command = [
             "docker", "run", "--rm", "--cidfile", str(cidfile),
             "--network", "none", "--memory", "2g", "--cpus", "2",
@@ -101,32 +105,42 @@ def execute_code(code: str, workdir: Path, timeout: int) -> dict:
             image, "python", "/workspace/generated_solution.py",
         ]
     else:
-        # Local test/development fallback. The GitHub workflows enable Docker isolation.
         command = [sys.executable, "-I", str(script)]
     try:
         result = subprocess.run(
             command, cwd=workdir, env=safe_env, text=True, capture_output=True,
             timeout=timeout, check=False,
         )
+        if cidfile.exists():
+            container_id = cidfile.read_text(encoding="utf-8", errors="replace").strip()
         return {
             "returncode": result.returncode,
             "stdout": result.stdout[-12000:], "stderr": result.stderr[-12000:],
             "duration_seconds": round(time.monotonic() - started, 3), "timed_out": False,
             "sandbox": "docker-network-disabled" if use_docker else "local-subprocess-not-hardened",
+            "container_id": container_id or None,
         }
     except subprocess.TimeoutExpired as exc:
-        if use_docker and cidfile.exists():
-            container_id = cidfile.read_text(encoding="utf-8").strip()
-            if container_id:
-                subprocess.run(["docker", "kill", container_id], capture_output=True, timeout=10, check=False)
+        if cidfile.exists():
+            container_id = cidfile.read_text(encoding="utf-8", errors="replace").strip()
+        if use_docker and container_id:
+            subprocess.run(["docker", "kill", container_id], capture_output=True, timeout=10, check=False)
         return {
             "returncode": 124,
             "stdout": (exc.stdout or b"").decode(errors="replace")[-12000:] if isinstance(exc.stdout, bytes) else (exc.stdout or "")[-12000:],
             "stderr": (exc.stderr or b"").decode(errors="replace")[-12000:] if isinstance(exc.stderr, bytes) else (exc.stderr or "")[-12000:],
             "duration_seconds": round(time.monotonic() - started, 3), "timed_out": True,
             "sandbox": "docker-network-disabled" if use_docker else "local-subprocess-not-hardened",
+            "container_id": container_id or None,
         }
-
+    finally:
+        # docker --rm removes the container; this removes its cidfile after success,
+        # process failure, or timeout so the next repair attempt can always start.
+        if cidfile.exists():
+            try:
+                cidfile.unlink()
+            except OSError:
+                pass
 
 def validate_execution(execution: dict) -> tuple[bool, str, dict | None]:
     if execution["returncode"] != 0:

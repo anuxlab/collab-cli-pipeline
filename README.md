@@ -135,3 +135,37 @@ Every manually triggered local Ollama model workflow now builds a compact, analy
 - `runner_resources.json`, `swap_status.txt`, `model_pull.log`, `ollama-serve.log`, and final system snapshots — supporting evidence.
 
 The model jobs use low-memory local Ollama settings (512-token context, 384-token generation cap, batch 16, one model/request at a time). Standard GitHub-hosted runners do not expose GPU VRAM; the workflows do not pretend that disk swap is VRAM. Larger quantized models may still be slow or OOM on hosted CPU runners. Setup/pull failures are captured and summarized, and artifacts are uploaded on failure. All model workflows remain manual-only.
+
+
+## LangGraph local-model agent experiments
+
+The AI-agent workflows now invoke `scripts/agent_langgraph.py`. LangGraph explicitly
+orchestrates the bounded loop:
+
+1. **Generate** a Python candidate through the local Ollama HTTP endpoint.
+2. **Execute** it inside the Docker sandbox (network disabled, resource and process limits).
+3. **Diagnose** the execution result and validate the final JSON metrics.
+4. **Repair** by sending the model the failed candidate's stdout, stderr, exit code,
+   timeout state, and validation reason.
+5. Repeat for at most two repairs, then save the final candidate and evidence.
+
+This is a local Ollama setup; LangGraph is the orchestration layer, not a hosted inference
+provider. No `HF_TOKEN` is needed. The graph trace is saved as `graph_trace.json`, with
+attempt details in `audit.json`, final metrics in `summary.json`, and a human-readable
+diagnostic in `analysis_report.md`.
+
+### Reliability fixes included
+
+- Docker execution uses a unique CID file per attempt and removes it in a `finally` block,
+  preventing a stale container ID file from blocking later repair attempts.
+- Each model workflow installs LangGraph and runs agent unit tests before downloading the
+  multi-gigabyte model.
+- The persistence job uses narrowly scoped `git add -f` for the run directory and comparison
+  reports, so repository ignore rules cannot silently discard experiment evidence.
+- Inference uses a 2,048-token context, 1,200-token output limit and batch size 16 to give
+  generated Python enough room while keeping the runtime batch small.
+- All experiment workflows remain manual-only (`workflow_dispatch`).
+
+The standard GitHub-hosted Ubuntu runner is CPU-only in this configuration. Quantization
+reduces weight memory but does not create GPU VRAM; larger model runs may still be slow or
+fail if their weights plus runtime overhead exceed available RAM.

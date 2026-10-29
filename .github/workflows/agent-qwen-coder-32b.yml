@@ -51,8 +51,8 @@ jobs:
       MODEL_SLUG: "qwen25-coder-14b-q4-k-s-local"
       MODEL_QUANTIZATION: "Q4_K_S"
       PYTHONUNBUFFERED: "1"
-      OLLAMA_NUM_CTX: "512"
-      OLLAMA_NUM_PREDICT: "384"
+      OLLAMA_NUM_CTX: "2048"
+      OLLAMA_NUM_PREDICT: "1200"
       OLLAMA_NUM_BATCH: "16"
     steps:
       - name: Checkout repository without persisted credentials
@@ -160,7 +160,7 @@ jobs:
             if [ $? -ne 0 ]; then status=failure; fi
           fi
           if [ "$status" = success ]; then
-            ( env OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_KEEP_ALIVE=1m OLLAMA_CONTEXT_LENGTH=512 OLLAMA_NUM_BATCH=16 OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 ollama serve > "$RUNNER_TEMP/ollama-serve.log" 2>&1 & )
+            ( env OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_KEEP_ALIVE=1m OLLAMA_CONTEXT_LENGTH=2048 OLLAMA_NUM_BATCH=16 OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 ollama serve > "$RUNNER_TEMP/ollama-serve.log" 2>&1 & )
             ready=0
             for i in $(seq 1 45); do
               if curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null; then ready=1; break; fi
@@ -221,7 +221,11 @@ jobs:
       - name: Install agent dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests 'nbformat>=5.9,<6' scikit-learn numpy
+          pip install requests 'nbformat>=5.9,<6' scikit-learn numpy 'langgraph>=0.2,<2' pytest
+
+      - name: Run agent orchestration tests
+        run: |
+          pytest -q tests/test_agent_experiment.py tests/test_agent_langgraph.py
 
       - name: Build isolated code-execution image
         run: docker build --file Dockerfile.agent-sandbox --tag collab-agent-sandbox:latest .
@@ -281,7 +285,7 @@ jobs:
           AGENT_USE_DOCKER: "1"
           AGENT_SANDBOX_IMAGE: collab-agent-sandbox:latest
         run: |
-          python scripts/agent_experiment.py \
+          python scripts/agent_langgraph.py \
             --model "$MODEL_ID" \
             --run-dir "$RUN_DIR" \
             --max-repairs "$MAX_REPAIRS" \
@@ -390,7 +394,7 @@ jobs:
           python scripts/compare_agent_runs.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$RUN_DIR" outputs/agent_runs/comparison.csv outputs/agent_runs/comparison.md
+          git add -f "$RUN_DIR" outputs/agent_runs/comparison.csv outputs/agent_runs/comparison.md
           if git diff --cached --quiet; then
             echo "No output changes to commit."
           else

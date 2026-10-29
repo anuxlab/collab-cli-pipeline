@@ -7,3 +7,6 @@ nbconvert>=7.16,<8
 pytest>=8,<9
 requests>=2.31,<3
 nbformat>=5.9,<6
+
+# LangGraph controls local-model generate/execute/diagnose/repair iterations.
+langgraph>=0.2,<2
