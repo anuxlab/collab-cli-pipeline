@@ -1,0 +1,181 @@
+name: AI Agent Experiment — Qwen2.5-Coder 32B
+
+# Deliberately manual-only. Do not add push, pull_request, or schedule triggers.
+on:
+  workflow_dispatch:
+    inputs:
+      max_repairs:
+        description: "Maximum repair attempts after the initial generation"
+        type: choice
+        required: true
+        default: "2"
+        options:
+          - "0"
+          - "1"
+          - "2"
+      execution_timeout:
+        description: "Generated script execution timeout in seconds"
+        type: choice
+        required: true
+        default: "60"
+        options:
+          - "30"
+          - "60"
+          - "120"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-agent-qwen25-coder-32b-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      run_dir: ${{ steps.meta.outputs.run_dir }}
+      artifact_name: ${{ steps.meta.outputs.artifact_name }}
+    env:
+      MODEL_ID: "Qwen/Qwen2.5-Coder-32B-Instruct"
+      MODEL_SLUG: "qwen25-coder-32b"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - name: Checkout repository without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Define immutable run directory
+        id: meta
+        shell: bash
+        run: |
+          run_dir="outputs/agent_runs/${{ github.run_id }}-${{ github.run_attempt }}-${{ env.MODEL_SLUG }}"
+          artifact_name="agent-${{ github.run_id }}-${{ github.run_attempt }}-${{ env.MODEL_SLUG }}"
+          echo "run_dir=$run_dir" >> "$GITHUB_OUTPUT"
+          echo "artifact_name=$artifact_name" >> "$GITHUB_OUTPUT"
+          mkdir -p "$run_dir"
+          python - <<'PYMETA'
+          import json, os, platform
+          from datetime import datetime, timezone
+          p = os.environ["RUN_DIR"]
+          with open(os.path.join(p, "run_metadata.json"), "w") as f:
+              json.dump({
+                  "workflow": os.environ.get("GITHUB_WORKFLOW"),
+                  "run_id": os.environ.get("GITHUB_RUN_ID"),
+                  "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
+                  "commit_sha": os.environ.get("GITHUB_SHA"),
+                  "ref": os.environ.get("GITHUB_REF"),
+                  "model": os.environ.get("MODEL_ID"),
+                  "python": platform.python_version(),
+                  "started_at_utc": datetime.now(timezone.utc).isoformat()
+              }, f, indent=2)
+          PYMETA
+        env:
+          RUN_DIR: outputs/agent_runs/${{ github.run_id }}-${{ github.run_attempt }}-qwen25-coder-32b
+
+      - name: Install agent dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests 'nbformat>=5.9,<6' scikit-learn numpy
+
+      - name: Build isolated code-execution image
+        run: docker build --file Dockerfile.agent-sandbox --tag collab-agent-sandbox:latest .
+
+      - name: Generate, execute, diagnose, and repair
+        id: agent_run
+        continue-on-error: true
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          MODEL_ID: ${{ env.MODEL_ID }}
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+          MAX_REPAIRS: ${{ inputs.max_repairs }}
+          EXECUTION_TIMEOUT: ${{ inputs.execution_timeout }}
+          AGENT_USE_DOCKER: "1"
+          AGENT_SANDBOX_IMAGE: collab-agent-sandbox:latest
+        run: |
+          python scripts/agent_experiment.py \
+            --model "$MODEL_ID" \
+            --run-dir "$RUN_DIR" \
+            --max-repairs "$MAX_REPAIRS" \
+            --execution-timeout "$EXECUTION_TIMEOUT"
+
+      - name: Record overall workflow result
+        if: always()
+        env:
+          AGENT_OUTCOME: ${{ steps.agent_run.outcome }}
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        run: |
+          python - <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          p = os.path.join(os.environ["RUN_DIR"], "workflow_status.json")
+          with open(p, "w") as f:
+              json.dump({"agent_step_outcome": os.environ.get("AGENT_OUTCOME", "not-run"), "recorded_at_utc": datetime.now(timezone.utc).isoformat()}, f, indent=2)
+          PY
+
+      - name: Upload model run, notebook, audit trail, and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.meta.outputs.artifact_name }}
+          path: ${{ steps.meta.outputs.run_dir }}/**
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Fail workflow if agent did not pass
+        if: ${{ steps.agent_run.outcome != 'success' }}
+        run: exit 1
+
+  persist-results:
+    # The agent job has read-only repository access. Only this separate job can write.
+    concurrency:
+      group: agent-results-${{ github.ref }}
+      cancel-in-progress: false
+    if: always() && needs.agent.outputs.run_dir != ''
+    needs: agent
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout repository for output persistence
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Download this run's artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.agent.outputs.artifact_name }}
+          path: staging-agent-results
+        continue-on-error: true
+
+      - name: Save this model run under a unique immutable path
+        env:
+          RUN_DIR: ${{ needs.agent.outputs.run_dir }}
+        run: |
+          if [ ! -d staging-agent-results ] || [ -z "$(find staging-agent-results -type f -print -quit)" ]; then
+            echo "No run files were available to persist; check the agent job logs."
+            exit 0
+          fi
+          mkdir -p "$RUN_DIR"
+          cp -R staging-agent-results/. "$RUN_DIR/"
+          python scripts/compare_agent_runs.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$RUN_DIR" outputs/agent_runs/comparison.csv outputs/agent_runs/comparison.md
+          if git diff --cached --quiet; then
+            echo "No output changes to commit."
+          else
+            git commit -m "experiment: save qwen25-coder-32b run ${{ github.run_id }} [skip ci]"
+            git push
+          fi

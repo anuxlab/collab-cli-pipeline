@@ -82,3 +82,44 @@ This prototype runs fixed, reviewed benchmark code; it does not yet ask an LLM t
 - Cross-validation uses the full dataset independently of the holdout split for model comparison; report the held-out metrics separately from CV metrics.
 - Timing values vary by runner load and software versions.
 - Model comparison is an engineering smoke test, not a statistically powered model-selection study.
+
+## AI coding-agent experiments (manual-only, separate workflows)
+
+The original **Collab CLI Experiment Pipeline** remains in place. Three additional workflows run separate model experiments, so runs can be compared independently:
+
+| Workflow in Actions | Model tested | Workflow file |
+|---|---|---|
+| AI Agent Experiment — Qwen2.5-Coder 7B | `Qwen/Qwen2.5-Coder-7B-Instruct` | `.github/workflows/agent-qwen-coder-7b.yml` |
+| AI Agent Experiment — Qwen2.5-Coder 32B | `Qwen/Qwen2.5-Coder-32B-Instruct` | `.github/workflows/agent-qwen-coder-32b.yml` |
+| AI Agent Experiment — DeepSeek-Coder-V2-Lite | `deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct` | `.github/workflows/agent-deepseek-coder.yml` |
+
+All three use only `workflow_dispatch`: **no push, pull-request, or scheduled trigger**. Each run has a unique path based on run ID, attempt, and model slug. This preserves experiment history instead of overwriting previous model outputs.
+
+### Configure Hugging Face
+
+1. In the GitHub repository, open **Settings → Secrets and variables → Actions**.
+2. Add a repository secret named **`HF_TOKEN`** with a Hugging Face token that has permission to use Inference Providers.
+3. Open **Actions**, choose one of the three AI Agent Experiment workflows, and click **Run workflow**.
+4. Choose 0, 1, or 2 repair attempts and an execution timeout.
+
+The model IDs use Hugging Face's OpenAI-compatible Inference Providers router. Availability depends on current provider support, account access, and model/provider capacity. A model can fail before code generation if no provider currently serves it; that failure is retained in the audit output and is not counted as a model coding failure.
+
+### Agent loop
+
+Each workflow performs initial code generation → isolated subprocess execution → diagnostics/metric validation → up to two repair attempts. The test task trains a deterministic scikit-learn binary classifier and requires a JSON metrics object. Every run saves a generated notebook, initial/final code when available, per-attempt stdout/stderr, repair patch, JSON audit, summary, metadata, and workflow status.
+
+Run outputs are uploaded as 90-day GitHub Actions artifacts and copied into a unique repository folder such as `outputs/agent_runs/<run-id>-<attempt>-qwen25-coder-7b/`. The persistence job is separate from the model job: the model job has read-only repository permissions and does not retain checkout credentials; only the persistence job has `contents: write`. Generated code is executed in a Docker container with network disabled, memory/CPU/PID limits, a read-only root filesystem, dropped Linux capabilities, and only the temporary workspace mounted. The model job does not retain checkout credentials and the generated-code container receives no secrets. The local test fallback uses a reduced-environment subprocess and is not a hardened sandbox. Do not place private data or secrets in the execution workspace.
+
+### Comparing model runs
+
+Compare each run's `summary.json`, `audit.json`, `repair.patch`, and stdout/stderr files. Key fields include final status, attempts used, validation result, duration, and classification metrics. Compare runs for the same task and similar timeout/repair settings. The model workflow may fail due to provider availability, quota, authorization, or model output quality; use the saved diagnostics to distinguish these.
+
+### Local tests
+
+```bash
+pip install -r requirements.txt
+pytest -q
+```
+
+The unit tests validate code-fence extraction, metric validation, and that the generated-code subprocess does not inherit `HF_TOKEN`. They do not call a live model API. Live model experiments must be manually started in GitHub Actions.
+

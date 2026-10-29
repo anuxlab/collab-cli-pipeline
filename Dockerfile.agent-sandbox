@@ -1,0 +1,5 @@
+# Runtime image for model-generated code. Build occurs before the model response is executed.
+FROM python:3.11-slim
+RUN pip install --no-cache-dir 'numpy>=1.26,<3' 'scikit-learn>=1.4,<2'
+WORKDIR /workspace
+USER 1000:1000
