@@ -1,0 +1,33 @@
+{
+  "experiment": "ai_notebook_code_repair",
+  "model": "qwen2.5-coder:14b-instruct-q4_K_S",
+  "inference_backend": "local_ollama",
+  "orchestrator": "langgraph",
+  "ollama_url": "http://127.0.0.1:11434",
+  "status": "passed",
+  "max_repairs": 2,
+  "attempts_used": 1,
+  "started_at_utc": "2026-10-30T21:13:54.418500+00:00",
+  "finished_at_utc": "2026-10-30T21:16:15.588917+00:00",
+  "metrics": {
+    "dataset": "breast_cancer",
+    "model": "LogisticRegression",
+    "accuracy": 0.986013986013986,
+    "precision": 0.9888888888888889,
+    "recall": 0.9888888888888889,
+    "f1": 0.9888888888888889,
+    "test_samples": 143
+  },
+  "final_execution": {
+    "returncode": 0,
+    "stdout": "{\"dataset\": \"breast_cancer\", \"model\": \"LogisticRegression\", \"accuracy\": 0.986013986013986, \"precision\": 0.9888888888888889, \"recall\": 0.9888888888888889, \"f1\": 0.9888888888888889, \"test_samples\": 143}\n",
+    "stderr": "",
+    "duration_seconds": 1.818,
+    "timed_out": false,
+    "sandbox": "docker-network-disabled",
+    "container_id": "0bc8e1a854330bb52faf11bf75162a6ff33e60feffd272b49afec9d1082b0593"
+  },
+  "final_validation": "passed",
+  "final_error": "",
+  "safety_note": "Workflow runs use a Docker container with networking disabled, resource limits, read-only root filesystem, and no credentials. Local fallback execution is not hardened."
+}
