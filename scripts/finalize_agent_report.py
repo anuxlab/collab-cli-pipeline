@@ -18,6 +18,7 @@ def classify(text: str) -> tuple[str, str]:
       (('manifest not found','pull model manifest','model not found','file does not exist','model tag not found'), 'MODEL_TAG_OR_PULL_FAILURE', 'The configured Ollama model tag may be unavailable or the model pull failed.'),
       (('connection refused','failed to connect','connection error'), 'OLLAMA_UNAVAILABLE', 'The local Ollama daemon was not reachable.'),
       (('timed out','timeout'), 'TIMEOUT', 'A model download, inference request, or generated-code execution exceeded its timeout.'),
+      (('pull access denied for collab-agent-sandbox','unable to find image \'collab-agent-sandbox','no such image'), 'SANDBOX_IMAGE_MISSING', 'The sandbox image was not built or was unavailable. Check the test and Docker-build steps; do not spend model repair attempts on this infrastructure error.'),
       (('docker build','error during connect','cannot connect to the docker daemon'), 'DOCKER_SETUP_FAILURE', 'The isolated execution container could not be built or started.'),
       (('json_missing','stdout_missing','metric_out_of_range','process_failed_or_timed_out'), 'GENERATED_CODE_OR_VALIDATION_FAILURE', 'Inference may have completed, but generated code failed execution or output validation.'),
     ]

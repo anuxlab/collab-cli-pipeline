@@ -169,3 +169,21 @@ diagnostic in `analysis_report.md`.
 The standard GitHub-hosted Ubuntu runner is CPU-only in this configuration. Quantization
 reduces weight memory but does not create GPU VRAM; larger model runs may still be slow or
 fail if their weights plus runtime overhead exceed available RAM.
+
+
+## Fixes from the latest hosted-runner failures
+
+The most recent 14B and DeepSeek runs generated code, but Docker returned exit code 125
+because the local `collab-agent-sandbox:latest` image had not been built. The preceding
+test step failed to import the repository's `scripts` package when invoked through the
+`pytest` console entry point. Since the agent step used `always()`, it continued despite
+the failed test and skipped Docker build.
+
+The workflows now:
+- Run tests as `PYTHONPATH="$GITHUB_WORKSPACE" python -m pytest ...`.
+- Install dependencies, run tests, and build the sandbox image **before downloading model weights**.
+- Only execute the model agent when prior setup steps succeed and the model is available.
+- Classify missing sandbox images as infrastructure failures, not model code failures.
+- Reuse the installer-managed Ollama service if it is already healthy, instead of starting a second daemon on port 11434.
+- Capture `journalctl -u ollama` in `ollama-systemd.log`.
+- Persist results with a fetch/reset/rebuild/retry loop so simultaneous workflow commits do not lose run artifacts or fail on non-fast-forward pushes.

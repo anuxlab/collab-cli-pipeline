@@ -142,6 +142,18 @@ jobs:
           print(json.dumps(record, indent=2))
           PYRESOURCE
 
+      - name: Install agent dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests 'nbformat>=5.9,<6' scikit-learn numpy 'langgraph>=0.2,<2' pytest
+
+      - name: Run agent orchestration tests
+        run: |
+          PYTHONPATH="$GITHUB_WORKSPACE" python -m pytest -q tests/test_agent_experiment.py tests/test_agent_langgraph.py
+
+      - name: Build isolated code-execution image
+        run: docker build --file Dockerfile.agent-sandbox --tag collab-agent-sandbox:latest .
+
       - name: Install and start local Ollama daemon
         id: ollama_setup
         continue-on-error: true
@@ -160,12 +172,20 @@ jobs:
             if [ $? -ne 0 ]; then status=failure; fi
           fi
           if [ "$status" = success ]; then
-            ( env OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_KEEP_ALIVE=1m OLLAMA_CONTEXT_LENGTH=2048 OLLAMA_NUM_BATCH=16 OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 ollama serve > "$RUNNER_TEMP/ollama-serve.log" 2>&1 & )
+            # The official installer normally starts a system service. Reuse it when
+            # healthy; starting another ollama serve would fail with address-already-in-use.
             ready=0
-            for i in $(seq 1 45); do
+            for i in $(seq 1 15); do
               if curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null; then ready=1; break; fi
               sleep 2
             done
+            if [ "$ready" -ne 1 ]; then
+              ( env OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_KEEP_ALIVE=1m OLLAMA_CONTEXT_LENGTH=2048 OLLAMA_NUM_BATCH=16 OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q8_0 ollama serve > "$RUNNER_TEMP/ollama-serve.log" 2>&1 & )
+              for i in $(seq 1 45); do
+                if curl --silent --fail http://127.0.0.1:11434/api/tags >/dev/null; then ready=1; break; fi
+                sleep 2
+              done
+            fi
             if [ "$ready" -ne 1 ]; then status=failure; echo "Ollama daemon did not become ready" > "$RUN_DIR/ollama_setup_error.txt"; fi
           fi
           echo "status=$status" > "$RUN_DIR/ollama_setup_status.txt"
@@ -218,18 +238,6 @@ jobs:
           fi
           exit 0
 
-      - name: Install agent dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests 'nbformat>=5.9,<6' scikit-learn numpy 'langgraph>=0.2,<2' pytest
-
-      - name: Run agent orchestration tests
-        run: |
-          pytest -q tests/test_agent_experiment.py tests/test_agent_langgraph.py
-
-      - name: Build isolated code-execution image
-        run: docker build --file Dockerfile.agent-sandbox --tag collab-agent-sandbox:latest .
-
       - name: Enable bounded disk-backed swap when storage permits
         # Swap uses SSD storage, not GPU VRAM. It can prevent some OOM failures,
         # but large-model inference may become much slower when pages are swapped.
@@ -273,7 +281,7 @@ jobs:
 
       - name: Generate, execute, diagnose, and repair
         id: agent_run
-        if: ${{ always() && steps.model_check.outputs.available == 'true' }}
+        if: ${{ success() && steps.model_check.outputs.available == 'true' }}
         continue-on-error: true
         env:
           MODEL_ID: ${{ env.MODEL_ID }}
@@ -315,6 +323,7 @@ jobs:
           set +e
           [ -f "$RUNNER_TEMP/ollama-serve.log" ] && cp "$RUNNER_TEMP/ollama-serve.log" "$RUN_DIR/ollama-serve.log"
           [ -f "$RUNNER_TEMP/ollama-install-stderr.log" ] && cp "$RUNNER_TEMP/ollama-install-stderr.log" "$RUN_DIR/ollama-install-stderr.log"
+          sudo journalctl -u ollama --no-pager -n 2000 > "$RUN_DIR/ollama-systemd.log" 2>&1 || true
           [ -f "$RUNNER_TEMP/ollama-install.sh" ] && sha256sum "$RUNNER_TEMP/ollama-install.sh" > "$RUN_DIR/ollama-installer-sha256.txt"
           [ -f "$RUN_DIR/ollama_setup_status.txt" ] || echo "status=not_run" > "$RUN_DIR/ollama_setup_status.txt"
           [ -f "$RUN_DIR/model_pull_status.txt" ] || echo "status=not_run" > "$RUN_DIR/model_pull_status.txt"
@@ -389,15 +398,28 @@ jobs:
             echo "No run files were available to persist; check the agent job logs."
             exit 0
           fi
-          mkdir -p "$RUN_DIR"
-          cp -R staging-agent-results/. "$RUN_DIR/"
-          python scripts/compare_agent_runs.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f "$RUN_DIR" outputs/agent_runs/comparison.csv outputs/agent_runs/comparison.md
-          if git diff --cached --quiet; then
-            echo "No output changes to commit."
-          else
-            git commit -m "experiment: save qwen25-coder-14b-q4-k-s-local run ${{ github.run_id }} [skip ci]"
-            git push
-          fi
+          branch="${GITHUB_REF_NAME}"
+          # The run artifact stays in staging while we reset to the newest remote commit.
+          # This makes concurrent workflows safe even when each updates comparison.csv/md.
+          for attempt in 1 2 3; do
+            git fetch origin "$branch"
+            git reset --hard "origin/$branch"
+            mkdir -p "$RUN_DIR"
+            cp -R staging-agent-results/. "$RUN_DIR/"
+            python scripts/compare_agent_runs.py
+            git add -f "$RUN_DIR" outputs/agent_runs/comparison.csv outputs/agent_runs/comparison.md
+            if git diff --cached --quiet; then
+              echo "No output changes to commit."
+              exit 0
+            fi
+            git commit -m "experiment: save model run ${{ github.run_id }} [skip ci]"
+            if git push origin "HEAD:$branch"; then
+              echo "Persisted experiment results on attempt $attempt."
+              exit 0
+            fi
+            echo "Push race on attempt $attempt; refreshing remote and rebuilding comparison report."
+          done
+          echo "Could not persist after 3 attempts; artifact remains available in Actions."
+          exit 1
