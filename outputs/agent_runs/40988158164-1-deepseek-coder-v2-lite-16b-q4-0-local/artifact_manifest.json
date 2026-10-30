@@ -1,0 +1,162 @@
+{
+  "generated_at_utc": "2026-10-30T01:55:13.738074+00:00",
+  "file_count": 39,
+  "files": [
+    {
+      "path": "analysis.json",
+      "bytes": 7671
+    },
+    {
+      "path": "analysis_report.md",
+      "bytes": 12058
+    },
+    {
+      "path": "audit.json",
+      "bytes": 2653
+    },
+    {
+      "path": "docker-images.txt",
+      "bytes": 738
+    },
+    {
+      "path": "execution_workspace/README.txt",
+      "bytes": 40
+    },
+    {
+      "path": "execution_workspace/generated_solution.py",
+      "bytes": 1268
+    },
+    {
+      "path": "final-disk.txt",
+      "bytes": 89
+    },
+    {
+      "path": "final-free-memory.txt",
+      "bytes": 207
+    },
+    {
+      "path": "final_system_snapshot.txt",
+      "bytes": 1043
+    },
+    {
+      "path": "generated_attempt_0.py",
+      "bytes": 1330
+    },
+    {
+      "path": "generated_attempt_1.py",
+      "bytes": 1364
+    },
+    {
+      "path": "generated_attempt_2.py",
+      "bytes": 1268
+    },
+    {
+      "path": "generated_notebook.ipynb",
+      "bytes": 2826
+    },
+    {
+      "path": "graph_trace.json",
+      "bytes": 1110
+    },
+    {
+      "path": "initial_solution.py",
+      "bytes": 1330
+    },
+    {
+      "path": "last_candidate.py",
+      "bytes": 1268
+    },
+    {
+      "path": "model_check.log",
+      "bytes": 497
+    },
+    {
+      "path": "model_check_status.txt",
+      "bytes": 15
+    },
+    {
+      "path": "model_pull.log",
+      "bytes": 118599
+    },
+    {
+      "path": "model_pull_status.txt",
+      "bytes": 27
+    },
+    {
+      "path": "ollama-install-stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "ollama-install.log",
+      "bytes": 7174
+    },
+    {
+      "path": "ollama-list-after-pull.txt",
+      "bytes": 191
+    },
+    {
+      "path": "ollama-ps.txt",
+      "bytes": 255
+    },
+    {
+      "path": "ollama-systemd.log",
+      "bytes": 72369
+    },
+    {
+      "path": "ollama_model_list.json",
+      "bytes": 228
+    },
+    {
+      "path": "ollama_setup_status.txt",
+      "bytes": 15
+    },
+    {
+      "path": "repair.patch",
+      "bytes": 43
+    },
+    {
+      "path": "run_metadata.json",
+      "bytes": 364
+    },
+    {
+      "path": "runner_resources.json",
+      "bytes": 476
+    },
+    {
+      "path": "stderr_attempt_0.txt",
+      "bytes": 0
+    },
+    {
+      "path": "stderr_attempt_1.txt",
+      "bytes": 0
+    },
+    {
+      "path": "stderr_attempt_2.txt",
+      "bytes": 115
+    },
+    {
+      "path": "stdout_attempt_0.txt",
+      "bytes": 231
+    },
+    {
+      "path": "stdout_attempt_1.txt",
+      "bytes": 231
+    },
+    {
+      "path": "stdout_attempt_2.txt",
+      "bytes": 0
+    },
+    {
+      "path": "summary.json",
+      "bytes": 1088
+    },
+    {
+      "path": "swap_status.txt",
+      "bytes": 696
+    },
+    {
+      "path": "workflow_status.json",
+      "bytes": 94
+    }
+  ]
+}
