@@ -17,16 +17,21 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 import nbformat
+
+try:
+    from scripts.notebook_builder import create_generated_notebook
+except ModuleNotFoundError:
+    from notebook_builder import create_generated_notebook
 from langgraph.graph import END, START, StateGraph
 
 try:
     # Package import is used by pytest; script-directory import supports direct workflow execution.
     from scripts.agent_experiment import (
-        DEFAULT_OLLAMA_URL, DEFAULT_TASK, call_model, execute_code, extract_code, validate_execution
+        DEFAULT_OLLAMA_URL, DEFAULT_TASK, MODEL_CALL_STATS, call_model, execute_code, extract_code, validate_execution
     )
 except ModuleNotFoundError:
     from agent_experiment import (
-        DEFAULT_OLLAMA_URL, DEFAULT_TASK, call_model, execute_code, extract_code, validate_execution
+        DEFAULT_OLLAMA_URL, DEFAULT_TASK, MODEL_CALL_STATS, call_model, execute_code, extract_code, validate_execution
     )
 
 
@@ -77,6 +82,7 @@ def node_generate_execute(state: AgentState) -> dict[str, Any]:
         response = call_model(
             state["model"], state["messages"], int(state["api_timeout"]), state["ollama_url"]
         )
+        model_stats = dict(MODEL_CALL_STATS)
         code = extract_code(response)
         run_dir = Path(state["run_dir"])
         (run_dir / f"generated_attempt_{attempt}.py").write_text(code, encoding="utf-8")
@@ -84,6 +90,7 @@ def node_generate_execute(state: AgentState) -> dict[str, Any]:
         record.update({
             "model_call_status": "success",
             "model_call_seconds": round(time.monotonic() - tick, 3),
+            "model_performance": model_stats,
             "execution": execution,
             "candidate_file": f"generated_attempt_{attempt}.py",
         })
@@ -92,6 +99,7 @@ def node_generate_execute(state: AgentState) -> dict[str, Any]:
     except Exception as exc:
         record.update({
             "model_call_status": "failure",
+            "model_performance": dict(MODEL_CALL_STATS),
             "error": f"{type(exc).__name__}: {str(exc)[:3000]}",
             "model_call_seconds": round(time.monotonic() - tick, 3),
         })
@@ -246,36 +254,11 @@ def write_outputs(state: AgentState, args: argparse.Namespace) -> None:
         (run_dir / f"stderr_attempt_{idx}.txt").write_text(ex.get("stderr", record.get("error", "")), encoding="utf-8")
 
     nb_code = final_code or initial_code or "# No code was generated successfully.\n"
-    nb = nbformat.v4.new_notebook()
-    nb.metadata = {
-        "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
-        "collab_cli_agent": {
-            "model": args.model,
-            "status": status,
-            "orchestrator": "LangGraph",
-        },
-    }
-    cell = nbformat.v4.new_code_cell(nb_code)
-    if execution:
-        cell.execution_count = 1
-        cell.outputs = []
-        if execution.get("stdout"):
-            cell.outputs.append(nbformat.v4.new_output("stream", name="stdout", text=execution["stdout"]))
-        if execution.get("stderr"):
-            cell.outputs.append(nbformat.v4.new_output("stream", name="stderr", text=execution["stderr"]))
-        if execution.get("returncode", 1) != 0:
-            cell.outputs.append(nbformat.v4.new_output(
-                "error", ename="ExecutionError",
-                evalue=f"Process returned {execution.get('returncode')}", traceback=[]
-            ))
-    nb.cells = [
-        nbformat.v4.new_markdown_cell(
-            f"# AI-generated ML experiment\n\nModel: `{args.model}`\n\n"
-            f"Orchestrator: **LangGraph**\n\nStatus: **{status}**"
-        ),
-        cell,
-    ]
-    nbformat.write(nb, run_dir / "generated_notebook.ipynb")
+    create_generated_notebook(
+        nb_code, run_dir / "generated_notebook.ipynb",
+        model=args.model, status=status, orchestrator="LangGraph",
+        execution=execution,
+    )
 
     if initial_code and final_code:
         diff = difflib.unified_diff(

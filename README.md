@@ -33,6 +33,10 @@ The `smoke` suite runs Iris with 3-fold cross-validation. The `extended` suite r
 
 Metrics include holdout accuracy, balanced accuracy, weighted precision/recall/F1, ROC AUC, cross-validation accuracy mean/std, and fit/prediction duration. The pipeline also saves confusion matrices and classification reports.
 
+## Generated notebook structure
+
+AI-generated notebooks are organized into multiple logical Jupyter cells instead of placing the complete script in one cell. The notebook builder separates imports, configuration/constants, reusable functions/classes, experiment steps, and the script entry point while preserving their original execution order. Run the code cells from top to bottom. If a generated candidate has a syntax error, its original text is retained in a diagnostic cell rather than being silently discarded. Captured execution output is attached to the final code cell, and the original `.py` file remains available for reproducibility.
+
 ## Output artifacts
 
 - `outputs/benchmark_summary.json` — compact run summary and best model per dataset
@@ -187,3 +191,39 @@ The workflows now:
 - Reuse the installer-managed Ollama service if it is already healthy, instead of starting a second daemon on port 11434.
 - Capture `journalctl -u ollama` in `ollama-systemd.log`.
 - Persist results with a fetch/reset/rebuild/retry loop so simultaneous workflow commits do not lose run artifacts or fail on non-fast-forward pushes.
+
+## High-end quantized reasoning-model workflow
+
+A separate manual workflow, `.github/workflows/agent-high-end-reasoning.yml`, adds a selectable model benchmark for:
+
+- `qwen3:30b-a3b-q4_K_M` — mixture-of-experts reasoning model (30B total parameters; fewer active per token).
+- `deepseek-r1:32b-qwen-distill-q4_K_M` — reasoning-focused model.
+- `qwen2.5-coder:32b` — larger coding-specialist model.
+
+These are Ollama model identifiers; the workflow records the exact identifier and model metadata in each run artifact. Quantization labels can differ between Ollama tags, so inspect `ollama show` and the captured model metadata rather than assuming every tag uses the same quantization format.
+
+**Runner requirements:** choose a self-hosted Linux x64 runner for these models. The workflow performs an early resource gate and requires at least 28 GiB total RAM and 35 GiB free workspace disk (32 GiB RAM / 50 GiB disk recommended). A GPU is strongly recommended for practical inference speed; CPU-only execution may be very slow. `ubuntu-latest` is offered only as an explicit selection and will normally stop at the resource gate instead of spending time downloading a model that cannot fit.
+
+The high-end workflow uses a 4,096-token context, a 2,048-token generation budget, batch size 8, and longer configurable inference timeouts. It remains `workflow_dispatch` only; it does not run on pushes or schedules. Start with one model at a time to avoid exhausting runner memory.
+
+## Validator robustness update
+
+The agent now accepts compact JSON, pretty-printed multi-line JSON, and a JSON result surrounded by ordinary log lines. Extraction handles nested objects, escaped quotes, and braces inside JSON strings. It validates the required result keys and metric ranges without requiring the JSON object to occupy one physical stdout line. Regression tests cover the DeepSeek output shape observed in the October 30 run.
+
+
+## Free GitHub-hosted runner inference profile
+
+The `agent-high-end-reasoning.yml` workflow has been repurposed as the resource-aware SLM workflow for standard `ubuntu-latest` GitHub-hosted runners. It offers one selected model per workflow execution (3B, 4B, or 7B), uses a 4,096-token context with a bounded generation budget, and skips inference before downloading weights when the available RAM or disk check fails. It does not require a self-hosted runner.
+
+### Runtime and storage controls
+
+- Ollama model layers are restored/saved through `actions/cache` using a model-specific key. Cache availability is best-effort: GitHub cache quotas, eviction, and large model layers mean a cache hit is not guaranteed. If the cache is unavailable, Ollama downloads the model normally.
+- Only the selected model is pulled for that workflow execution. The model is stopped after inference, while its cached layers are retained for future runs.
+- Temporary Docker containers, the sandbox image, monitor files, and installer files are cleaned up. Experiment outputs and diagnostics are uploaded before the job finishes.
+- The workflow records runner resources, periodic Ollama RSS samples, peak Ollama RSS, and per-call prompt/output token counts, generation duration, and output tokens/second in the attempt audit JSON.
+- The agent job uploads artifacts with `if: always()`. A separate persistence job attempts to commit the run data even when inference or validation fails.
+- No large swapfile is created. Swap-backed inference can cause severe disk thrashing and is not a substitute for RAM.
+
+### Two-model collaboration
+
+A two-SLM setup is feasible on a free runner if the models are used **sequentially**, not kept resident together. A practical pattern is: (1) a 3B/4B model drafts code, (2) unload it, (3) a 7B model reviews the code and produces a concise critique, and (4) the first model (or the reviewer) applies the critique before sandbox execution. In a GitHub Actions design, each model can also run in its own sequential job with an artifact hand-off; each job downloads only its own model. This costs two model downloads on a cold cache and increases wall-clock time, but avoids simultaneous model RAM pressure. A parallel two-model setup is not recommended on standard free hosted runners.

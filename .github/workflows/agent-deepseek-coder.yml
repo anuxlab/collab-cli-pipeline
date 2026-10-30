@@ -191,8 +191,37 @@ jobs:
           echo "status=$status" > "$RUN_DIR/ollama_setup_status.txt"
           exit 0
 
+      - name: Preflight model against available hosted-runner resources
+        id: resource_gate
+        env:
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+          MODEL_ID: ${{ env.MODEL_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          available_kb=$(awk '/MemAvailable:/ {print $2}' /proc/meminfo)
+          available_gb=$((available_kb / 1024 / 1024))
+          free_gb=$(df -BG "$GITHUB_WORKSPACE" | awk 'NR==2 {gsub("G", "", $4); print $4}')
+          required_gb=7
+          case "$MODEL_ID" in *:14b*|*:16b*) required_gb=12 ;; esac
+          status=ready
+          if [ "$available_gb" -lt "$required_gb" ] || [ "$free_gb" -lt 8 ]; then status=skip; fi
+          printf 'available_ram_gib=%s\nfree_disk_gib=%s\nrequired_available_ram_gib=%s\nstatus=%s\n' "$available_gb" "$free_gb" "$required_gb" "$status" | tee "$RUN_DIR/model_resource_gate.txt"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Ollama model-layer cache
+        if: ${{ steps.resource_gate.outputs.status == 'ready' && steps.ollama_setup.outcome == 'success' }}
+        id: ollama_cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.ollama/models
+            /usr/share/ollama/.ollama/models
+          key: ${{ runner.os }}-ollama-${{ env.MODEL_ID }}-v1
+
       - name: Pull quantized model with diagnostics
         id: pull_model
+        if: ${{ steps.resource_gate.outputs.status == 'ready' && steps.ollama_setup.outcome == 'success' }}
         continue-on-error: true
         env:
           MODEL_ID: ${{ env.MODEL_ID }}
@@ -212,9 +241,18 @@ jobs:
           ollama list > "$RUN_DIR/ollama-list-after-pull.txt" 2>&1 || true
           exit 0
 
+      - name: Save Ollama model-layer cache
+        if: ${{ always() && steps.pull_model.outcome == 'success' && steps.ollama_cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.ollama/models
+            /usr/share/ollama/.ollama/models
+          key: ${{ runner.os }}-ollama-${{ env.MODEL_ID }}-v1
+
       - name: Verify model is available locally
         id: model_check
-        if: always()
+        if: ${{ always() && steps.resource_gate.outputs.status == 'ready' }}
         continue-on-error: true
         env:
           MODEL_ID: ${{ env.MODEL_ID }}
@@ -238,50 +276,32 @@ jobs:
           fi
           exit 0
 
-      - name: Enable bounded disk-backed swap when storage permits
-        # Swap uses SSD storage, not GPU VRAM. It can prevent some OOM failures,
-        # but large-model inference may become much slower when pages are swapped.
+      - name: Record no-swap policy
+        env:
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        run: echo "No temporary swapfile is created; swap-backed inference can thrash hosted-runner disk." > "$RUN_DIR/swap-policy.txt"
+
+      - name: Start Ollama peak-memory monitor
+        if: ${{ steps.resource_gate.outputs.status == 'ready' && steps.model_check.outputs.available == 'true' }}
         env:
           RUN_DIR: ${{ steps.meta.outputs.run_dir }}
         shell: bash
         run: |
-          set -uo pipefail
-          status="$RUN_DIR/swap_status.txt"
-          {
-            echo "=== Before swap ==="
-            free -h
-            df -h "$GITHUB_WORKSPACE"
-            echo
-          } | tee "$status"
-          available_kb=$(df -Pk / | awk 'NR==2 {print $4}')
-          current_swap_kb=$(awk '/SwapTotal:/ {print $2}' /proc/meminfo)
-          if [ "${current_swap_kb:-0}" -ge 2097152 ]; then
-            echo "Existing swap is at least 2 GiB; leaving it unchanged." | tee -a "$status"
-          elif [ "${available_kb:-0}" -ge 3145728 ]; then
-            echo "Creating a 2 GiB temporary swapfile; this consumes SSD space." | tee -a "$status"
-            if (sudo fallocate -l 2G /swapfile 2>/dev/null || sudo dd if=/dev/zero of=/swapfile bs=1M count=2048 status=none) \
-              && sudo chmod 600 /swapfile \
-              && sudo mkswap /swapfile >/dev/null \
-              && sudo swapon /swapfile; then
-              echo "swap_enabled=true" | tee -a "$status"
-            else
-              echo "swap_enabled=false (swapfile creation or activation failed)" | tee -a "$status"
-              sudo swapoff /swapfile 2>/dev/null || true
-              sudo rm -f /swapfile || true
-            fi
-          else
-            echo "swap_enabled=false (less than 3 GiB disk free; preserving model/runtime space)" | tee -a "$status"
-          fi
-          {
-            echo
-            echo "=== After swap attempt ==="
-            free -h
-            df -h "$GITHUB_WORKSPACE"
-          } | tee -a "$status"
+          (
+            peak_kb=0
+            while [ ! -f "$RUN_DIR/.stop_memory_monitor" ]; do
+              rss_kb=$(ps -C ollama -o rss= 2>/dev/null | awk '{s+=$1} END {print s+0}')
+              [ "$rss_kb" -gt "$peak_kb" ] && peak_kb=$rss_kb
+              printf '%s,%s\n' "$(date -u +%FT%TZ)" "$rss_kb" >> "$RUN_DIR/ollama_memory_samples.csv"
+              sleep 3
+            done
+            printf '{"peak_ollama_rss_kib":%s}\n' "$peak_kb" > "$RUN_DIR/peak_memory.json"
+          ) &
+          echo $! > "$RUN_DIR/.memory_monitor_pid"
 
       - name: Generate, execute, diagnose, and repair
         id: agent_run
-        if: ${{ success() && steps.model_check.outputs.available == 'true' }}
+        if: ${{ success() && steps.resource_gate.outputs.status == 'ready' && steps.model_check.outputs.available == 'true' }}
         continue-on-error: true
         env:
           MODEL_ID: ${{ env.MODEL_ID }}
@@ -299,6 +319,20 @@ jobs:
             --max-repairs "$MAX_REPAIRS" \
             --execution-timeout "$EXECUTION_TIMEOUT" \
             --api-timeout "$MODEL_TIMEOUT"
+
+      - name: Stop memory monitor
+        if: always()
+        env:
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        shell: bash
+        run: |
+          touch "$RUN_DIR/.stop_memory_monitor"
+          if [ -f "$RUN_DIR/.memory_monitor_pid" ]; then
+            pid=$(cat "$RUN_DIR/.memory_monitor_pid")
+            for i in $(seq 1 10); do kill -0 "$pid" 2>/dev/null || break; sleep 1; done
+            kill "$pid" 2>/dev/null || true
+          fi
+          rm -f "$RUN_DIR/.memory_monitor_pid" "$RUN_DIR/.stop_memory_monitor"
 
       - name: Record overall workflow result
         if: always()
@@ -332,6 +366,19 @@ jobs:
           (ollama ps > "$RUN_DIR/ollama-ps.txt" 2>&1) || true
           (docker image ls > "$RUN_DIR/docker-images.txt" 2>&1) || true
 
+      - name: Clean transient model and Docker artifacts
+        if: always()
+        env:
+          MODEL_ID: ${{ env.MODEL_ID }}
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}
+        shell: bash
+        run: |
+          set +e
+          ollama stop "$MODEL_ID" > "$RUN_DIR/ollama-stop.log" 2>&1
+          docker image rm collab-agent-sandbox:latest > "$RUN_DIR/docker-cleanup.log" 2>&1
+          docker container prune -f >> "$RUN_DIR/docker-cleanup.log" 2>&1
+          rm -f "$RUNNER_TEMP/install-ollama.sh" "$RUNNER_TEMP/ollama-serve.log"
+
       - name: Build analysis-first artifact report
         if: always()
         env:
@@ -363,7 +410,7 @@ jobs:
           retention-days: 90
 
       - name: Fail workflow if agent did not pass
-        if: ${{ steps.agent_run.outcome != 'success' }}
+        if: ${{ steps.resource_gate.outputs.status == 'ready' && steps.agent_run.outcome != 'success' }}
         run: exit 1
 
   persist-results:

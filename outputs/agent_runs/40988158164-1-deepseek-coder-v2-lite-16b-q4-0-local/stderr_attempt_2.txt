@@ -1,4 +1,0 @@
-  File "/workspace/generated_solution.py", line 41
-    output = {
-             ^
-SyntaxError: '{' was never closed

@@ -81,3 +81,36 @@ def test_local_ollama_chat_request(monkeypatch):
     assert captured["body"]["options"]["num_ctx"] == 2048
     assert captured["body"]["options"]["num_predict"] == 1200
     assert captured["body"]["options"]["num_batch"] == 16
+
+
+def test_pretty_printed_multiline_json_is_accepted():
+    payload = {
+        "dataset": "breast_cancer", "model": "LogisticRegression",
+        "accuracy": 0.986013986013986, "precision": 0.9888888888888889,
+        "recall": 0.9888888888888889, "f1": 0.9888888888888889,
+        "test_samples": 143,
+    }
+    execution = {
+        "returncode": 0, "stdout": "training complete\n" + json.dumps(payload, indent=2) + "\n",
+        "stderr": "", "duration_seconds": 0.1, "timed_out": False,
+    }
+    ok, reason, metrics = validate_execution(execution)
+    assert ok is True
+    assert reason == "passed"
+    assert metrics["test_samples"] == 143
+
+
+def test_json_object_after_logs_and_nested_braces_is_accepted():
+    payload = {
+        "dataset": "demo", "model": "test", "accuracy": 0.9,
+        "precision": 0.8, "recall": 0.85, "f1": 0.82,
+        "test_samples": 10, "metadata": {"note": "brace } inside string"},
+    }
+    execution = {
+        "returncode": 0, "stdout": "INFO: training finished\nRESULTS:\n" + json.dumps(payload, indent=2),
+        "stderr": "", "duration_seconds": 0.1, "timed_out": False,
+    }
+    ok, reason, metrics = validate_execution(execution)
+    assert ok is True
+    assert reason == "passed"
+    assert metrics["accuracy"] == 0.9
