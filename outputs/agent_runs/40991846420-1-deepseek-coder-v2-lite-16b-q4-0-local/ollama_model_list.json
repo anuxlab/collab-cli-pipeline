@@ -1,0 +1,5 @@
+{
+  "returncode": 0,
+  "stdout": "NAME                                        ID              SIZE      MODIFIED           \ndeepseek-coder-v2:16b-lite-instruct-q4_0    63fb193b3a9b    8.9 GB    About a minute ago    \n",
+  "stderr": ""
+}
