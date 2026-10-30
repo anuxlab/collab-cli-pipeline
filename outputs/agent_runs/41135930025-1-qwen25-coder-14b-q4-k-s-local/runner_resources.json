@@ -1,0 +1,21 @@
+{
+  "cpu_count": 4,
+  "memory_kib": {
+    "MemTotal": 16367524,
+    "MemAvailable": 14926864,
+    "SwapTotal": 3145724,
+    "SwapFree": 3145724
+  },
+  "workspace_disk_bytes": {
+    "total": 154894188544,
+    "used": 63289466880,
+    "free": 91587944448
+  },
+  "gpu": {
+    "available": false,
+    "details": "No NVIDIA GPU detected; standard hosted runner uses CPU inference."
+  },
+  "runner_name": "GitHub Actions 1000001625",
+  "runner_os": "Linux",
+  "runner_arch": "X64"
+}

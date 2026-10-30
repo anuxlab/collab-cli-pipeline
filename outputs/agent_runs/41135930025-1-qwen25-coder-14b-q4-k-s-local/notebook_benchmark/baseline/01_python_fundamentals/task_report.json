@@ -1,0 +1,211 @@
+{
+  "task": {
+    "id": "01_python_fundamentals",
+    "level": "1-simple",
+    "title": "Python fundamentals and numerical reasoning",
+    "rubric": [
+      "mean",
+      "median",
+      "variance",
+      "assert"
+    ],
+    "prompt": "Create a clean, reproducible Python notebook script that analyses this fixed list [4, 7, 7, 10, 12, 14, 18]. Compute count, mean, median, population variance, min and max using Python standard library only. Validate results with assertions and explain why mean and median differ. Print one final line beginning BENCHMARK_RESULT= followed by JSON with task_id, count, mean, median, variance, min, max. Do not hardcode computed answers; calculate them."
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "duration_seconds": 111.79,
+      "execution": {
+        "returncode": 127,
+        "stdout": "",
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135930025-1-qwen25-coder-14b-q4-k-s-local/notebook_benchmark/baseline/01_python_fundamentals/agent-container-6985f11840b44c65ae5ad2f6f9ec2acd.cid: no such file or directory\n\nRun 'docker run --help' for more information\n",
+        "duration_seconds": 0.018,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": null
+      },
+      "score": {
+        "task_id": "01_python_fundamentals",
+        "level": "1-simple",
+        "title": "Python fundamentals and numerical reasoning",
+        "score": 48.0,
+        "components": {
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 25.0,
+          "notebook_structure": 10,
+          "source_reconstruction": 5,
+          "section_diversity": 8
+        },
+        "rubric_hits": [
+          "mean",
+          "median",
+          "variance",
+          "assert"
+        ],
+        "rubric_missing": [],
+        "execution_ok": false,
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 5,
+        "markdown_cells": 6,
+        "section_headings": [
+          "Environment and imports",
+          "Experiment configuration",
+          "Data inspection and exploratory analysis",
+          "Experiment configuration",
+          "Experiment execution"
+        ],
+        "returncode": 127,
+        "timed_out": false,
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135930025-1-qwen25-coder-14b-q4-k-s-local/notebook_benchmark/baseline/01_python_fundamentals/agent-container-6985f11840b44c65ae5ad2f6f9ec2acd.cid: no such file or directory\n\nRun 'docker run --help' for more information\n"
+      },
+      "script": "attempt_0.py",
+      "notebook": "notebook_attempt_0.ipynb"
+    },
+    {
+      "attempt": 1,
+      "duration_seconds": 106.25,
+      "execution": {
+        "returncode": 127,
+        "stdout": "",
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135930025-1-qwen25-coder-14b-q4-k-s-local/notebook_benchmark/baseline/01_python_fundamentals/agent-container-5803be8f47f74995a5d14ab69a23e35a.cid: no such file or directory\n\nRun 'docker run --help' for more information\n",
+        "duration_seconds": 0.014,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": null
+      },
+      "score": {
+        "task_id": "01_python_fundamentals",
+        "level": "1-simple",
+        "title": "Python fundamentals and numerical reasoning",
+        "score": 48.0,
+        "components": {
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 25.0,
+          "notebook_structure": 10,
+          "source_reconstruction": 5,
+          "section_diversity": 8
+        },
+        "rubric_hits": [
+          "mean",
+          "median",
+          "variance",
+          "assert"
+        ],
+        "rubric_missing": [],
+        "execution_ok": false,
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 5,
+        "markdown_cells": 6,
+        "section_headings": [
+          "Environment and imports",
+          "Experiment configuration",
+          "Data inspection and exploratory analysis",
+          "Experiment configuration",
+          "Experiment execution"
+        ],
+        "returncode": 127,
+        "timed_out": false,
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135930025-1-qwen25-coder-14b-q4-k-s-local/notebook_benchmark/baseline/01_python_fundamentals/agent-container-5803be8f47f74995a5d14ab69a23e35a.cid: no such file or directory\n\nRun 'docker run --help' for more information\n"
+      },
+      "script": "attempt_1.py",
+      "notebook": "notebook_attempt_1.ipynb"
+    },
+    {
+      "attempt": 2,
+      "duration_seconds": 112.15,
+      "execution": {
+        "returncode": 127,
+        "stdout": "",
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135930025-1-qwen25-coder-14b-q4-k-s-local/notebook_benchmark/baseline/01_python_fundamentals/agent-container-c23b8adb318042e9a74908c45287776b.cid: no such file or directory\n\nRun 'docker run --help' for more information\n",
+        "duration_seconds": 0.015,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": null
+      },
+      "score": {
+        "task_id": "01_python_fundamentals",
+        "level": "1-simple",
+        "title": "Python fundamentals and numerical reasoning",
+        "score": 48.0,
+        "components": {
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 25.0,
+          "notebook_structure": 10,
+          "source_reconstruction": 5,
+          "section_diversity": 8
+        },
+        "rubric_hits": [
+          "mean",
+          "median",
+          "variance",
+          "assert"
+        ],
+        "rubric_missing": [],
+        "execution_ok": false,
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 5,
+        "markdown_cells": 6,
+        "section_headings": [
+          "Environment and imports",
+          "Experiment configuration",
+          "Data inspection and exploratory analysis",
+          "Experiment configuration",
+          "Experiment execution"
+        ],
+        "returncode": 127,
+        "timed_out": false,
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135930025-1-qwen25-coder-14b-q4-k-s-local/notebook_benchmark/baseline/01_python_fundamentals/agent-container-c23b8adb318042e9a74908c45287776b.cid: no such file or directory\n\nRun 'docker run --help' for more information\n"
+      },
+      "script": "attempt_2.py",
+      "notebook": "notebook_attempt_2.ipynb"
+    }
+  ],
+  "final_score": {
+    "task_id": "01_python_fundamentals",
+    "level": "1-simple",
+    "title": "Python fundamentals and numerical reasoning",
+    "score": 48.0,
+    "components": {
+      "execution": 0,
+      "structured_result": 0,
+      "rubric_coverage": 25.0,
+      "notebook_structure": 10,
+      "source_reconstruction": 5,
+      "section_diversity": 8
+    },
+    "rubric_hits": [
+      "mean",
+      "median",
+      "variance",
+      "assert"
+    ],
+    "rubric_missing": [],
+    "execution_ok": false,
+    "task_result_ok": false,
+    "source_reconstruction_ok": true,
+    "result": null,
+    "code_cells": 5,
+    "markdown_cells": 6,
+    "section_headings": [
+      "Environment and imports",
+      "Experiment configuration",
+      "Data inspection and exploratory analysis",
+      "Experiment configuration",
+      "Experiment execution"
+    ],
+    "returncode": 127,
+    "timed_out": false,
+    "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135930025-1-qwen25-coder-14b-q4-k-s-local/notebook_benchmark/baseline/01_python_fundamentals/agent-container-c23b8adb318042e9a74908c45287776b.cid: no such file or directory\n\nRun 'docker run --help' for more information\n"
+  },
+  "final_status": "failed",
+  "final_notebook": "outputs/agent_runs/41135930025-1-qwen25-coder-14b-q4-k-s-local/notebook_benchmark/baseline/01_python_fundamentals/notebook.ipynb"
+}
