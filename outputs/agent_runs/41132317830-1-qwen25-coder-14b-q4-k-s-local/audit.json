@@ -1,0 +1,40 @@
+[
+  {
+    "attempt": 0,
+    "started_at_utc": "2026-10-30T21:46:07.346857+00:00",
+    "orchestrator": "langgraph",
+    "model_call_status": "success",
+    "model_call_seconds": 329.131,
+    "model_performance": {
+      "prompt_tokens": 875,
+      "output_tokens": 382,
+      "prompt_eval_seconds": 142.679,
+      "generation_seconds": 166.36,
+      "total_seconds": 327.193,
+      "tokens_per_second": 2.296
+    },
+    "web_searches": [],
+    "execution": {
+      "returncode": 0,
+      "stdout": "{\"dataset\": \"breast_cancer\", \"model\": \"LogisticRegression\", \"accuracy\": 0.986013986013986, \"precision\": 0.9888888888888889, \"recall\": 0.9888888888888889, \"f1\": 0.9888888888888889, \"test_samples\": 143}\n",
+      "stderr": "",
+      "duration_seconds": 1.934,
+      "timed_out": false,
+      "sandbox": "docker-network-disabled",
+      "container_id": "07220b98f5e6ec2f423c0d6416e557a600d1965c400517584d9f9e58f6b13f25"
+    },
+    "candidate_file": "generated_attempt_0.py",
+    "finished_at_utc": "2026-10-30T21:51:36.478230+00:00",
+    "validation": "passed",
+    "status": "passed",
+    "metrics": {
+      "dataset": "breast_cancer",
+      "model": "LogisticRegression",
+      "accuracy": 0.986013986013986,
+      "precision": 0.9888888888888889,
+      "recall": 0.9888888888888889,
+      "f1": 0.9888888888888889,
+      "test_samples": 143
+    }
+  }
+]
