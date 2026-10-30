@@ -1,0 +1,86 @@
+{
+  "generated_at_utc": "2026-10-30T21:12:41.259727+00:00",
+  "file_count": 20,
+  "files": [
+    {
+      "path": ".stop_memory_monitor",
+      "bytes": 0
+    },
+    {
+      "path": "analysis.json",
+      "bytes": 3035
+    },
+    {
+      "path": "analysis_report.md",
+      "bytes": 3630
+    },
+    {
+      "path": "docker-cleanup.log",
+      "bytes": 97
+    },
+    {
+      "path": "docker-images.txt",
+      "bytes": 632
+    },
+    {
+      "path": "final-disk.txt",
+      "bytes": 89
+    },
+    {
+      "path": "final-free-memory.txt",
+      "bytes": 207
+    },
+    {
+      "path": "final_system_snapshot.txt",
+      "bytes": 1043
+    },
+    {
+      "path": "model_check.log",
+      "bytes": 40
+    },
+    {
+      "path": "model_check_status.txt",
+      "bytes": 15
+    },
+    {
+      "path": "model_pull_status.txt",
+      "bytes": 15
+    },
+    {
+      "path": "model_resource_gate.txt",
+      "bytes": 97
+    },
+    {
+      "path": "ollama-ps.txt",
+      "bytes": 100
+    },
+    {
+      "path": "ollama-stop.log",
+      "bytes": 99
+    },
+    {
+      "path": "ollama-systemd.log",
+      "bytes": 17
+    },
+    {
+      "path": "ollama_model_list.json",
+      "bytes": 42
+    },
+    {
+      "path": "ollama_setup_status.txt",
+      "bytes": 15
+    },
+    {
+      "path": "run_metadata.json",
+      "bytes": 355
+    },
+    {
+      "path": "runner_resources.json",
+      "bytes": 476
+    },
+    {
+      "path": "workflow_status.json",
+      "bytes": 94
+    }
+  ]
+}
