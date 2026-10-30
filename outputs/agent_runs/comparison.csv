@@ -1,0 +1,2 @@
+run_folder,model,status,attempts_used,max_repairs,accuracy,precision,recall,f1,test_samples,execution_seconds,started_at_utc,finished_at_utc
+40988176392-1-qwen25-coder-14b-q4-k-s-local,qwen2.5-coder:14b-instruct-q4_K_S,passed,1,2,0.986013986013986,0.9888888888888889,0.9888888888888889,0.9888888888888889,143,2.042,2026-10-30T01:52:11.655936+00:00,2026-10-30T01:55:00.776401+00:00
