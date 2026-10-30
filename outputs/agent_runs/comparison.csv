@@ -1,0 +1,2 @@
+run_folder,model,status,attempts_used,max_repairs,accuracy,precision,recall,f1,test_samples,execution_seconds,started_at_utc,finished_at_utc
+41132271685-1-deepseek-coder-v2-lite-16b-q4-0-local,deepseek-coder-v2:16b-lite-instruct-q4_0,passed,1,5,0.986013986013986,0.9888888888888889,0.9888888888888889,0.9888888888888889,143,2.158,2026-10-30T21:42:24.759823+00:00,2026-10-30T21:43:50.784769+00:00
