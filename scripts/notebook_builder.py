@@ -34,6 +34,14 @@ SECTION_GUIDES = {
     "Export and persistence": "Save models, tables, figures and machine-readable results.",
     "Experiment execution": "Run the remaining experiment logic in its original order.",
     "Reusable definitions": "Define functions and classes that are used by later notebook sections.",
+    "Temporal feature engineering": "Construct lagged, rolling and calendar features using past observations only.",
+    "Forecasting and temporal baselines": "Establish naive or seasonal forecasts and fit time-aware prediction methods.",
+    "Forecast evaluation and residual diagnostics": "Evaluate predictions on later time periods and inspect forecast errors.",
+    "Text preprocessing and vectorization": "Transform raw text into model-ready representations while preserving the train/test boundary.",
+    "Text classification and error analysis": "Fit text classifiers, evaluate class-wise behaviour and inspect misclassified examples.",
+    "Optimization problem formulation": "Define decision variables, objective, constraints and feasibility conditions.",
+    "Optimization algorithms and heuristics": "Solve the optimization problem and compare exact methods with practical heuristics.",
+    "Solution verification": "Verify feasibility, objective values and optimality against independent checks.",
 }
 
 # Ordered from specific to general. These are semantic hints, not mandatory
@@ -96,6 +104,27 @@ def _semantic_section(node: ast.AST, source: str) -> str:
         }
         if normalized in aliases:
             return aliases[normalized]
+
+    # Domain-aware sections make notebooks for forecasting, NLP and optimization
+    # materially different from the generic supervised-learning template.
+    time_series_context = any(token in text for token in ("timeseries", "time_series", "forecast", "seasonal", "lag_", "rolling"))
+    if time_series_context:
+        if any(token in text for token in ("shift(", "rolling(", "resample(", "timeseriessplit", "lag_", "date_range")):
+            return "Temporal feature engineering"
+        if any(token in text for token in ("naive", "forecast", "arima", "exponential_smoothing", "linearregression")):
+            return "Forecasting and temporal baselines"
+        if any(token in text for token in ("mae", "rmse", "residual", "forecast_error")):
+            return "Forecast evaluation and residual diagnostics"
+    if any(token in text for token in ("tfidfvectorizer", "countvectorizer", "tokeniz", "text_clean", "lemmatiz")):
+        return "Text preprocessing and vectorization"
+    if any(token in text for token in ("sentiment", "misclassified", "text_classifier", "classification_report")):
+        return "Text classification and error analysis"
+    if any(token in text for token in ("knapsack", "capacity", "decision_vars", "objective", "constraints", "feasible")):
+        if any(token in text for token in ("optimal_value", "assert", "feasible", "verify")):
+            return "Solution verification"
+        return "Optimization problem formulation"
+    if any(token in text for token in ("dynamic_programming", "itertools.product", "greedy", "enumerate_subsets", "dp[")):
+        return "Optimization algorithms and heuristics"
 
     for section, hints in RULES:
         if any(hint in text for hint in hints):
@@ -194,7 +223,7 @@ def create_generated_notebook(
         },
     }
     intro = (
-        "# Generated ML / Data Science Experiment\n\n"
+        "# Generated Computational Notebook\n\n"
         f"**Model:** `{model}`  \n**Orchestrator:** `{orchestrator}`  \n**Agent status:** `{status}`\n\n"
         "## How to use this notebook\n\n"
         "1. Select a Python 3 kernel and install any dependencies not already available.\n"

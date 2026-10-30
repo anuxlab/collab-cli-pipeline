@@ -114,7 +114,7 @@ All three use only `workflow_dispatch`: **no push, pull-request, or scheduled tr
 
 ### Agent loop and safety
 
-Each workflow generates Python code, executes it in a Docker container with networking disabled and resource limits, diagnoses errors and invalid metrics, and permits at most two repairs. It saves generated scripts, a generated notebook, per-attempt stdout/stderr, `audit.json`, `summary.json`, and `repair.patch`. Model inference stays outside the generated-code container; the container receives no inference credentials. The model job has read-only repository permissions; a separate persistence job writes the run record and refreshes the comparison report. Do not place private data or secrets in prompts or the execution workspace.
+Each workflow generates Python code, executes it in a Docker container with networking disabled and resource limits, diagnoses errors and invalid metrics, and permits up to five repairs after the initial generation (six total code-generation attempts). It saves generated scripts, a generated notebook, per-attempt stdout/stderr, `audit.json`, `summary.json`, and `repair.patch`. Model inference stays outside the generated-code container; the container receives no inference credentials. The model job has read-only repository permissions; a separate persistence job writes the run record and refreshes the comparison report. Do not place private data or secrets in prompts or the execution workspace.
 
 ### Comparing model runs
 
@@ -153,7 +153,7 @@ orchestrates the bounded loop:
 3. **Diagnose** the execution result and validate the final JSON metrics.
 4. **Repair** by sending the model the failed candidate's stdout, stderr, exit code,
    timeout state, and validation reason.
-5. Repeat for at most two repairs, then save the final candidate and evidence.
+5. Repeat for up to five repairs after the initial generation, then save the final candidate and evidence.
 
 This is a local Ollama setup; LangGraph is the orchestration layer, not a hosted inference
 provider. No `HF_TOKEN` is needed. The graph trace is saved as `graph_trace.json`, with
@@ -265,3 +265,68 @@ The manual agent workflows include an `enable_dspy_planning` switch (off by defa
 - The complete planner result is recorded in `summary.json` under `dspy_planning`.
 - Enable it for controlled comparisons; compare otherwise-identical runs with planning on and off.
 
+
+
+## Progressive notebook-generation benchmark and prompt optimization
+
+The repository now includes a dedicated benchmark for detecting notebook-generation weaknesses across **seven increasingly difficult and deliberately different tasks**:
+
+1. Python numerical fundamentals (simple)
+2. Data quality, EDA, grouping and visualization
+3. Leakage-aware binary classification with a baseline and error analysis
+4. Regression model comparison, cross-validation and residual diagnostics
+5. Time-series forecasting with chronological splits and leakage checks
+6. Small-data NLP sentiment classification with misclassification analysis
+7. 0/1 knapsack optimization with exact-vs-greedy comparison and verification
+
+Run locally after starting Ollama and pulling the selected model:
+
+```bash
+AGENT_USE_DOCKER=1 AGENT_SANDBOX_IMAGE=collab-agent-sandbox:latest \
+python scripts/notebook_benchmark.py \
+  --model qwen2.5-coder:7b-instruct-q4_K_M \
+  --output-dir outputs/notebook-benchmarks/qwen-7b \
+  --task-set all --max-repairs 2
+```
+
+The benchmark creates one notebook per task, preserves the generated source order, executes the source in the isolated sandbox, and records each attempt. It scores execution, task-specific structured output, rubric coverage, notebook cell structure, source reconstruction, and semantic-section diversity. Failed tasks receive targeted repair feedback. Outputs include `benchmark_summary.json`, per-task reports, every generated script, and every notebook attempt.
+
+### DSPy automatic prompt optimization
+
+To compare a baseline against a DSPy-optimized task-planning prompt:
+
+```bash
+pip install -r requirements-dspy.txt
+AGENT_USE_DOCKER=1 AGENT_SANDBOX_IMAGE=collab-agent-sandbox:latest \
+python scripts/notebook_benchmark.py \
+  --model qwen2.5-coder:7b-instruct-q4_K_M \
+  --output-dir outputs/notebook-benchmarks/qwen-7b-dspy \
+  --task-set all --max-repairs 2 --dspy-optimize
+```
+
+This runs the baseline suite, uses DSPy `BootstrapFewShot` to optimize a task-specific notebook-planning module from a training subset, then reruns the suite with generated guidance. It writes `dspy_optimization.json` and `baseline_vs_dspy.json`; the latter reports both overall and held-out task score deltas. DSPy uses the same local Ollama endpoint and does not require a hosted API key. Optimization adds inference calls and is therefore opt-in on GitHub-hosted runners.
+
+**Evaluation caution:** the score is a transparent engineering rubric, not a scientific measure of creativity. The optimizer's metric is rubric-grounded and the first experiment is exploratory. Repeat runs with multiple seeds, rotate held-out task splits, and manually inspect correctness and interpretation before concluding that DSPy improved reasoning.
+
+### Detecting template collapse across models
+
+Run the benchmark separately for each model, then compare outputs. For a normal benchmark, point to its root directory; for a DSPy experiment, compare the `baseline/` directories with one another or the `optimized/` directories with one another:
+
+```bash
+python scripts/compare_notebook_benchmarks.py \
+  --runs qwen7=outputs/notebook-benchmarks/qwen-7b \
+         deepseek=outputs/notebook-benchmarks/deepseek \
+         qwen14=outputs/notebook-benchmarks/qwen-14b \
+  --output outputs/notebook-benchmarks/cross-model-comparison.json
+```
+
+The comparison reports per-model scores and token-level code similarity for the same task. Similarity above 0.92 is flagged for manual review as a possible sign of template collapse; similarity alone does not establish plagiarism or lack of reasoning. The task rubric and generated outputs should be reviewed together.
+
+### GitHub Actions controls
+
+The four manual agent workflows now expose:
+- `enable_notebook_benchmark` — run the progressive suite (off by default).
+- `notebook_task_set` — `simple`, `complex`, or `all`.
+- `enable_dspy_prompt_optimization` — run baseline-vs-DSPy optimization (requires the benchmark to be enabled).
+
+The benchmark uses the same already-pulled local model and Docker sandbox. It is intentionally optional because the full suite plus optimization can take many model calls on CPU-only free runners. Benchmark artifacts are stored under the workflow run directory.

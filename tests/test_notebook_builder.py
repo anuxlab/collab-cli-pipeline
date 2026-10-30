@@ -99,3 +99,42 @@ def test_cells_have_stable_ids_and_semantic_metadata():
     code_cells = [c for c in first if c.cell_type == "code"]
     assert code_cells
     assert code_cells[0].metadata.collab_cli.section == "Environment and imports"
+
+
+def test_time_series_notebook_gets_temporal_specific_sections():
+    source = '''import numpy as np
+from sklearn.linear_model import LinearRegression
+series = np.arange(200, dtype=float)
+lag_features = series[:-1]
+rolling_mean = np.convolve(series, np.ones(7) / 7, mode="valid")
+forecast = LinearRegression()
+forecast_error = 2.4
+rmse = 1.2
+'''
+    cells = build_notebook_cells(source)
+    headings = [c.source.splitlines()[0] for c in cells if c.cell_type == "markdown"]
+    assert any("Temporal feature engineering" in h for h in headings)
+    assert any("Forecasting and temporal baselines" in h for h in headings)
+
+
+def test_nlp_notebook_gets_text_specific_sections():
+    source = '''from sklearn.feature_extraction.text import TfidfVectorizer
+vectorizer = TfidfVectorizer(ngram_range=(1, 2))
+X_text = vectorizer.fit_transform(texts)
+sentiment_predictions = classifier.predict(X_text)
+'''
+    headings = [c.source.splitlines()[0] for c in build_notebook_cells(source) if c.cell_type == "markdown"]
+    assert any("Text preprocessing and vectorization" in h for h in headings)
+    assert any("Text classification and error analysis" in h for h in headings)
+
+
+def test_optimization_notebook_gets_problem_and_solution_sections():
+    source = '''capacity = 20
+knapsack_value = 0
+optimal_value = 42
+is_feasible = True
+assert is_feasible
+'''
+    headings = [c.source.splitlines()[0] for c in build_notebook_cells(source) if c.cell_type == "markdown"]
+    assert any("Optimization problem formulation" in h for h in headings)
+    assert any("Solution verification" in h for h in headings)

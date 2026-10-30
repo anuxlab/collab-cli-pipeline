@@ -50,6 +50,25 @@ on:
         type: boolean
         required: true
         default: false
+      enable_notebook_benchmark:
+        description: "Run progressive simple-to-complex notebook-generation benchmark (adds multiple model calls)"
+        type: boolean
+        required: true
+        default: false
+      notebook_task_set:
+        description: "Notebook benchmark difficulty range"
+        type: choice
+        required: true
+        default: "all"
+        options:
+          - "all"
+          - "simple"
+          - "complex"
+      enable_dspy_prompt_optimization:
+        description: "Run baseline vs DSPy BootstrapFewShot prompt optimization experiment (additional model calls)"
+        type: boolean
+        required: true
+        default: false
 
 permissions:
   contents: read
@@ -169,12 +188,12 @@ jobs:
           pip install requests 'nbformat>=5.9,<6' scikit-learn numpy 'langgraph>=0.2,<2' 'ddgs>=9.14,<10' pytest
 
       - name: Install optional DSPy planner
-        if: ${{ inputs.enable_dspy_planning }}
+        if: ${{ inputs.enable_dspy_planning || inputs.enable_dspy_prompt_optimization }}
         run: pip install -r requirements-dspy.txt
 
       - name: Run agent orchestration tests
         run: |
-          PYTHONPATH="$GITHUB_WORKSPACE" python -m pytest -q tests/test_agent_experiment.py tests/test_agent_langgraph.py tests/test_web_search.py
+          PYTHONPATH="$GITHUB_WORKSPACE" python -m pytest -q tests/test_agent_experiment.py tests/test_agent_langgraph.py tests/test_web_search.py tests/test_notebook_builder.py tests/test_notebook_benchmark.py
 
       - name: Build isolated code-execution image
         run: docker build --file Dockerfile.agent-sandbox --tag collab-agent-sandbox:latest .
@@ -323,6 +342,33 @@ jobs:
             printf '{"peak_ollama_rss_kib":%s}\n' "$peak_kb" > "$RUN_DIR/peak_memory.json"
           ) &
           echo $! > "$RUN_DIR/.memory_monitor_pid"
+
+      - name: Progressive notebook-generation benchmark
+        id: notebook_benchmark
+        if: ${{ success() && inputs.enable_notebook_benchmark && steps.resource_gate.outputs.status == 'ready' && steps.model_check.outputs.available == 'true' }}
+        continue-on-error: true
+        env:
+          MODEL_ID: ${{ env.MODEL_ID }}
+          OLLAMA_BASE_URL: http://127.0.0.1:11434
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}/notebook_benchmark
+          MODEL_TIMEOUT: ${{ inputs.model_timeout }}
+          TASK_SET: ${{ inputs.notebook_task_set }}
+          ENABLE_DSPY_OPTIMIZATION: ${{ inputs.enable_dspy_prompt_optimization }}
+          AGENT_USE_DOCKER: "1"
+          AGENT_SANDBOX_IMAGE: collab-agent-sandbox:latest
+        shell: bash
+        run: |
+          OPTIMIZER_ARGS=()
+          if [ "$ENABLE_DSPY_OPTIMIZATION" = "true" ]; then
+            OPTIMIZER_ARGS+=(--dspy-optimize)
+          fi
+          python scripts/notebook_benchmark.py \
+            --model "$MODEL_ID" \
+            --output-dir "$RUN_DIR" \
+            --timeout "$MODEL_TIMEOUT" \
+            --max-repairs 2 \
+            --task-set "$TASK_SET" \
+            "${OPTIMIZER_ARGS[@]}"
 
       - name: Generate, execute, diagnose, and repair
         id: agent_run
