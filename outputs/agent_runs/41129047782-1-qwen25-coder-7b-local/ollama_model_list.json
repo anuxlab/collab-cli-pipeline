@@ -1,0 +1,5 @@
+{
+  "returncode": 0,
+  "stdout": "NAME                                ID              SIZE      MODIFIED           \nqwen2.5-coder:7b-instruct-q4_K_M    dae161e27b0e    4.7 GB    About a minute ago    \n",
+  "stderr": ""
+}

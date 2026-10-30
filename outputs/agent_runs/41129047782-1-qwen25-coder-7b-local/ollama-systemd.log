@@ -1,0 +1,305 @@
+Oct 30 21:12:17 runnervm48cm3 systemd[1]: Started ollama.service - Ollama Service.
+Oct 30 21:12:17 runnervm48cm3 ollama[2885]: Couldn't find '/usr/share/ollama/.ollama/id_ed25519'. Generating new private key.
+Oct 30 21:12:17 runnervm48cm3 ollama[2885]: Your new public key is:
+Oct 30 21:12:17 runnervm48cm3 ollama[2885]: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyRaD6mz+eBKlNqLx4ai1f1SL+8/i46TY9G/Nse6jxi
+Oct 30 21:12:17 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:17.898Z level=INFO source=routes.go:2474 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: LLAMA_ARG_FIT: LLAMA_ARG_FIT_TARGET: NO_PROXY: OLLAMA_CONTEXT_LENGTH:0 OLLAMA_CREATE_REMOTE:false OLLAMA_DEBUG:INFO OLLAMA_DEBUG_LOG_REQUESTS:false OLLAMA_EDITOR: OLLAMA_FLASH_ATTENTION:false OLLAMA_GO_TEMPLATE:true OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://127.0.0.1:11434 OLLAMA_IGPU_ENABLE: OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:0 OLLAMA_MAX_QUEUE:512 OLLAMA_MAX_TRANSFER_STREAMS:4 OLLAMA_MODELS:/usr/share/ollama/.ollama/models OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:false OLLAMA_NO_CLOUD:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false OLLAMA_VULKAN:true ROCR_VISIBLE_DEVICES: http_proxy: https_proxy: no_proxy:]"
+Oct 30 21:12:17 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:17.898Z level=INFO source=routes.go:2476 msg="Ollama cloud disabled: false"
+Oct 30 21:12:17 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:17.898Z level=INFO source=images.go:1033 msg="total blobs: 0"
+Oct 30 21:12:17 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:17.898Z level=INFO source=images.go:1042 msg="total unused blobs removed: 0"
+Oct 30 21:12:17 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:17.898Z level=INFO source=routes.go:2536 msg="Listening on 127.0.0.1:11434 (version 0.40.13)"
+Oct 30 21:12:17 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:17.899Z level=INFO source=runner.go:60 msg="discovering available GPUs..."
+Oct 30 21:12:18 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:18.036Z level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=3h52m39.667759122s consecutive_failures=0
+Oct 30 21:12:18 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:18.059Z level=INFO source=types.go:50 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="15.6 GiB" available="14.6 GiB"
+Oct 30 21:12:18 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:18.059Z level=INFO source=routes.go:2586 msg="vram-based default context" total_vram="0 B" default_num_ctx=4096
+Oct 30 21:12:19 runnervm48cm3 ollama[2885]: [GIN] 2026/10/30 - 21:12:19 | 200 | 244.364µs |       127.0.0.1 | GET      "/api/tags"
+Oct 30 21:12:20 runnervm48cm3 ollama[2885]: [GIN] 2026/10/30 - 21:12:20 | 200 | 38.191µs |       127.0.0.1 | HEAD     "/"
+Oct 30 21:12:21 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:21.407Z level=INFO source=download.go:182 msg="downloading 60e05f210007 in 16 292 MB part(s)"
+Oct 30 21:12:35 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:35.373Z level=INFO source=download.go:182 msg="downloading 66b9ea09bd5b in 1 68 B part(s)"
+Oct 30 21:12:35 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:35.846Z level=INFO source=download.go:182 msg="downloading 1e65450c3067 in 1 1.6 KB part(s)"
+Oct 30 21:12:36 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:36.295Z level=INFO source=download.go:182 msg="downloading 832dd9e00a68 in 1 11 KB part(s)"
+Oct 30 21:12:39 runnervm48cm3 ollama[2885]: [GIN] 2026/10/30 - 21:12:39 | 200 |   19.63s |       127.0.0.1 | POST     "/api/pull"
+Oct 30 21:12:39 runnervm48cm3 ollama[2885]: [GIN] 2026/10/30 - 21:12:39 | 200 | 23.624µs |       127.0.0.1 | HEAD     "/"
+Oct 30 21:12:39 runnervm48cm3 ollama[2885]: [GIN] 2026/10/30 - 21:12:39 | 200 |   39.1ms |       127.0.0.1 | GET      "/api/tags"
+Oct 30 21:12:50 runnervm48cm3 ollama[2885]: [GIN] 2026/10/30 - 21:12:50 | 200 |   2.04ms |       127.0.0.1 | GET      "/api/tags"
+Oct 30 21:12:50 runnervm48cm3 ollama[2885]: [GIN] 2026/10/30 - 21:12:50 | 200 | 33.954µs |       127.0.0.1 | HEAD     "/"
+Oct 30 21:12:50 runnervm48cm3 ollama[2885]: [GIN] 2026/10/30 - 21:12:50 | 200 |  57.01ms |       127.0.0.1 | POST     "/api/show"
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:56.067Z level=INFO source=sched.go:1183 msg="disabling mmap for llama-server load by default" model=/usr/share/ollama/.ollama/models/blobs/sha256-60e05f2100071479f596b964f89f510f057ce397ea22f2833a0cfe029bfc2463 reason=cpu
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:56.067Z level=INFO source=server.go:107 msg="using llama-server for model" model=/usr/share/ollama/.ollama/models/blobs/sha256-60e05f2100071479f596b964f89f510f057ce397ea22f2833a0cfe029bfc2463
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:56.067Z level=INFO source=llama_server.go:467 msg="starting llama-server" cmd="/usr/local/lib/ollama/llama-server --model /usr/share/ollama/.ollama/models/blobs/sha256-60e05f2100071479f596b964f89f510f057ce397ea22f2833a0cfe029bfc2463 --port 44097 --host 127.0.0.1 --no-webui --offline -c 2048 -np 1 --log-verbosity 4 --no-log-prefix --no-log-timestamps --no-jinja --chat-template chatml --load-mode none --flash-attn auto -b 16 -ub 16 --context-shift --keep 4"
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:56.068Z level=INFO source=sched.go:658 msg="system memory" total="15.6 GiB" free="14.4 GiB" free_swap="3.0 GiB"
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:56.068Z level=INFO source=llama_server.go:1098 msg="loading model via llama-server" model=/usr/share/ollama/.ollama/models/blobs/sha256-60e05f2100071479f596b964f89f510f057ce397ea22f2833a0cfe029bfc2463
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:56.068Z level=INFO source=llama_server.go:1351 msg="waiting for llama-server to start responding"
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:56.068Z level=INFO source=llama_server.go:1406 msg="waiting for llama-server to become available" status="llm server not responding"
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: srv  llama_server: initializing ...
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load_backend: loaded CPU backend from /usr/local/lib/ollama/libggml-cpu-haswell.so
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: cmn  common_param: common_params_print_info: build 1 (39febd2ad) with GNU 13.3.1 for Linux x86_64
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: cmn  common_param: common_params_print_info: verbosity = 4 (adjust with the `-lv N` CLI arg)
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: cmn  common_param: device_info:
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: cmn  common_param:   - CPU     : AMD EPYC 7763 64-Core Processor (15983 MiB, 15983 MiB free)
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: cmn  common_param: system_info: n_threads = 2 (n_threads_batch = 2) / 4 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | REPACK = 1 |
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: srv  init_listene: The UI is disabled
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: srv  init_listene: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: srv          init: using 5 threads for HTTP server
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: srv  server_setup: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: srv    load_model: loading model '/usr/share/ollama/.ollama/models/blobs/sha256-60e05f2100071479f596b964f89f510f057ce397ea22f2833a0cfe029bfc2463'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: srv    load_model: local path '/usr/share/ollama/.ollama/models/blobs/sha256-60e05f2100071479f596b964f89f510f057ce397ea22f2833a0cfe029bfc2463'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: cmn  common_fit_a: fitting params to device memory ...
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: cmn  common_fit_a: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: common_params_fit_impl: getting device memory data for initial parameters:
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: common_memory_breakdown_print: | memory breakdown [MiB] | total   free    self   model   context   compute    unaccounted |
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: common_memory_breakdown_print: |   - Host               |                 1600 =  1483 +     112 +       4                |
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: common_memory_breakdown_print: |   - CPU_REPACK         |                 2976 =  2976 +       0 +       0                |
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: common_params_fit_impl: projected to use 1600 MiB of host memory vs. 15983 MiB of total host memory
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: common_params_fit_impl: will leave 14383 >= 1024 MiB of system memory, no changes needed
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: common_fit_params: successfully fit params to free device memory
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: common_fit_params: fitting params to free memory took 0.15 seconds
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: loaded meta data with 34 key-value pairs and 339 tensors from /usr/share/ollama/.ollama/models/blobs/sha256-60e05f2100071479f596b964f89f510f057ce397ea22f2833a0cfe029bfc2463 (version GGUF V3 (latest))
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   0:                       general.architecture str              = qwen2
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   1:                               general.type str              = model
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   2:                               general.name str              = Qwen2.5 Coder 7B Instruct
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   3:                           general.finetune str              = Instruct
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   4:                           general.basename str              = Qwen2.5-Coder
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   5:                         general.size_label str              = 7B
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   6:                            general.license str              = apache-2.0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   7:                       general.license.link str              = https://huggingface.co/Qwen/Qwen2.5-C...
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   8:                   general.base_model.count u32              = 1
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv   9:                  general.base_model.0.name str              = Qwen2.5 Coder 7B
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  10:          general.base_model.0.organization str              = Qwen
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  11:              general.base_model.0.repo_url str              = https://huggingface.co/Qwen/Qwen2.5-C...
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  12:                               general.tags arr[str,6]       = ["code", "codeqwen", "chat", "qwen", ...
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  13:                          general.languages arr[str,1]       = ["en"]
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  14:                          qwen2.block_count u32              = 28
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  15:                       qwen2.context_length u32              = 32768
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  16:                     qwen2.embedding_length u32              = 3584
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  17:                  qwen2.feed_forward_length u32              = 18944
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  18:                 qwen2.attention.head_count u32              = 28
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  19:              qwen2.attention.head_count_kv u32              = 4
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  20:                       qwen2.rope.freq_base f32              = 1000000.000000
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  21:     qwen2.attention.layer_norm_rms_epsilon f32              = 0.000001
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  22:                          general.file_type u32              = 15
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  23:                       tokenizer.ggml.model str              = gpt2
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  24:                         tokenizer.ggml.pre str              = qwen2
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  25:                      tokenizer.ggml.tokens arr[str,152064]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  26:                  tokenizer.ggml.token_type arr[i32,152064]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  27:                      tokenizer.ggml.merges arr[str,151387]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  28:                tokenizer.ggml.eos_token_id u32              = 151645
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  29:            tokenizer.ggml.padding_token_id u32              = 151643
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  30:                tokenizer.ggml.bos_token_id u32              = 151643
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  31:               tokenizer.ggml.add_bos_token bool             = false
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  32:                    tokenizer.chat_template str              = {%- if tools %}\n    {{- '<|im_start|>...
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - kv  33:               general.quantization_version u32              = 2
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - type  f32:  141 tensors
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - type q4_K:  169 tensors
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: llama_model_loader: - type q6_K:   29 tensors
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: file format = GGUF V3 (latest)
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: file type   = Q4_K - Medium
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: file size   = 4.36 GiB (4.91 BPW)
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load: 0 unused tokens
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: time=2026-10-30T21:12:56.319Z level=INFO source=llama_server.go:1406 msg="waiting for llama-server to become available" status="llm server loading model"
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load: printing all EOG tokens:
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load:   - 128247 ('</s>')
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load:   - 151643 ('<|endoftext|>')
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load:   - 151645 ('<|im_end|>')
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load:   - 151662 ('<|fim_pad|>')
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load:   - 151663 ('<|repo_name|>')
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load:   - 151664 ('<|file_sep|>')
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load: special tokens cache size = 23
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load: token to piece cache size = 0.9310 MB
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: arch                  = qwen2
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: vocab_only            = 0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: no_alloc              = 0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_ctx_train           = 32768
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_embd_inp            = 3584
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_embd                = 3584
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_embd_out            = 3584
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_layer               = 28
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_layer_all           = 28
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_head                = 28
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_head_kv             = 4
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_rot                 = 128
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_swa                 = 0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: is_swa_any            = 0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: non_causal_type       = 0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_embd_head_k         = 128
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_embd_head_v         = 128
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_gqa                 = 7
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_embd_k_gqa          = 512
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_embd_v_gqa          = 512
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: f_norm_eps            = 0.0e+00
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: f_norm_rms_eps        = 1.0e-06
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: f_clamp_kqv           = 0.0e+00
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: f_max_alibi_bias      = 0.0e+00
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: f_logit_scale         = 0.0e+00
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: f_attn_scale          = 0.0e+00
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: f_attn_value_scale    = 0.0000
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_ff                  = 18944
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_expert              = 0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_expert_used         = 0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_expert_groups       = 0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_group_used          = 0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: causal attn           = 1
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: pooling type          = -1
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: rope type             = 2
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: rope scaling          = linear
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: freq_base_train       = 1000000.0
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: freq_scale_train      = 1
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_ctx_orig_yarn       = 32768
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: rope_yarn_log_mul     = 0.0000
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: rope_finetuned        = unknown
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: model type            = 7B
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: model params          = 7.62 B
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: general.name          = Qwen2.5 Coder 7B Instruct
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: vocab type            = BPE
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_vocab               = 152064
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: n_merges              = 151387
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: BOS token             = 151643 '<|endoftext|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: EOS token             = 151645 '<|im_end|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: EOT token             = 151645 '<|im_end|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: PAD token             = 151643 '<|endoftext|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: LF token              = 198 'Ċ'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: FIM PRE token         = 151659 '<|fim_prefix|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: FIM SUF token         = 151661 '<|fim_suffix|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: FIM MID token         = 151660 '<|fim_middle|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: FIM PAD token         = 151662 '<|fim_pad|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: FIM REP token         = 151663 '<|repo_name|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: FIM SEP token         = 151664 '<|file_sep|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: EOG token             = 128247 '</s>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: EOG token             = 151643 '<|endoftext|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: EOG token             = 151645 '<|im_end|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: EOG token             = 151662 '<|fim_pad|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: EOG token             = 151663 '<|repo_name|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: EOG token             = 151664 '<|file_sep|>'
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: print_info: max token length      = 256
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load_tensors: loading model tensors, this can take a while... (load_mode = none)
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load_tensors:          CPU model buffer size =  1483.70 MiB
+Oct 30 21:12:56 runnervm48cm3 ollama[2885]: load_tensors:   CPU_REPACK model buffer size =  2976.75 MiB
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: cmn  common_init_: added </s> logit bias = -inf
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: cmn  common_init_: added <|endoftext|> logit bias = -inf
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: cmn  common_init_: added <|im_end|> logit bias = -inf
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: cmn  common_init_: added <|fim_pad|> logit bias = -inf
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: cmn  common_init_: added <|repo_name|> logit bias = -inf
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: cmn  common_init_: added <|file_sep|> logit bias = -inf
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: constructing llama_context
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: n_seq_max             = 1
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: n_ctx                 = 2048
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: n_ctx_seq             = 2048
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: n_batch               = 16
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: n_ubatch              = 16
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: causal_attn           = 1
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: flash_attn            = auto
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: kv_unified            = false
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: freq_base             = 1000000.0
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: freq_scale            = 1
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: n_rs_seq              = 0
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: n_outputs_max         = 1
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: n_outputs_max_per_seq = 1
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context: n_ctx_seq (2048) < n_ctx_train (32768) -- the full capacity of the model will not be utilized
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_context:        CPU  output buffer size =     0.58 MiB
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_kv_cache:        CPU KV buffer size =   112.00 MiB
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_kv_cache: size =  112.00 MiB (  2048 cells,  28 layers,  1/1 seqs), K (f16):   56.00 MiB, V (f16):   56.00 MiB
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_kv_cache: n_rot_k = 0, n_embd_head_k_all = 128
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: llama_kv_cache: n_rot_v = 0, n_embd_head_k_all = 128
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: sched_reserve: reserving ...
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: resolve_fused_ops: Flash Attention enabled
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: resolve_fused_ops: fused DeepSeek V4 HC post enabled
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: sched_reserve:        CPU compute buffer size =     4.63 MiB
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: sched_reserve: graph: nodes = 961, splits = 1, input objects = 4, input tensors = 9
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: sched_reserve: reserve took 3.60 ms, sched copies = 1
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: cmn          init: llama threadpool init, n_threads = 2
+Oct 30 21:13:02 runnervm48cm3 ollama[2885]: cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv    load_model: initializing, n_slots = 1, n_ctx_slot = 2048, kv_unified = 'false'
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: spec common_specu: no implementations specified for speculative decoding
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: slot   load_model: id  0 | task -1 | new slot, n_ctx = 2048
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv    load_model: use `--cache-ram 0` to disable the prompt cache
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv    load_model: context checkpoints enabled, max = 32, min spacing = 8192
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv          init: idle slots will be saved to prompt cache upon starting a new task
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv          init: init: chat template, example_format: '<|im_start|>system
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: You are a helpful assistant<|im_end|>
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: <|im_start|>user
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: Hello<|im_end|>
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: <|im_start|>assistant
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: Hi there<|im_end|>
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: <|im_start|>user
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: How are you?<|im_end|>
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: <|im_start|>assistant
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: '
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv          init: init: chat template, thinking = 0
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv          init: preserve_reasoning kwarg: not supported by template
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv  server_run_i: model loaded
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv  server_on_li: listening on http://127.0.0.1:44097
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv  update_slots: all slots are idle
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: time=2026-10-30T21:13:03.351Z level=INFO source=llama_server.go:1418 msg="llama-server started in 7.28 seconds"
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: time=2026-10-30T21:13:03.351Z level=INFO source=images.go:431 msg="template selection" model=registry.ollama.ai/library/qwen2.5-coder:7b-instruct-q4_K_M selected=go_template renderer="" parser="" go_template="[completion tools insert]" chat_template="[tools completion]" harmony=null renderer_parser=null
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: time=2026-10-30T21:13:03.351Z level=INFO source=sched.go:782 msg="loaded runners" count=1
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: time=2026-10-30T21:13:03.351Z level=INFO source=llama_server.go:1351 msg="waiting for llama-server to start responding"
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: time=2026-10-30T21:13:03.352Z level=INFO source=llama_server.go:1418 msg="llama-server started in 7.28 seconds"
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv  server_strea: conv_id= (empty=1)
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: slot get_availabl: id  0 | task -1 |  - skipping, slot is empty
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: slot get_availabl: id  0 | task -1 | selected slot by LRU, n_tokens = 0, t_last = -1
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv  get_availabl: updating prompt cache
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv          load:  - looking for better prompt, base f_keep = -1.000, f_sim = 0.000
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv        update:  - cache state: 0 prompts, 0.000 MiB (limits: 8192.000 MiB, 2048 tokens, 8589934592 est)
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: srv  get_availabl: prompt cache update took 0.02 ms
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: slot launch_slot_: id  0 | task -1 | sampler params:
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]:         repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]:         dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]:         top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.100
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]:         mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 2048, n_keep = 4, task.n_tokens = 209
+Oct 30 21:13:03 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 0, memory_seq_rm [0, end)
+Oct 30 21:13:04 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 16, memory_seq_rm [16, end)
+Oct 30 21:13:05 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 32, memory_seq_rm [32, end)
+Oct 30 21:13:06 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     48, progress = 0.23, t =   3.57 s / 13.45 tokens per second
+Oct 30 21:13:06 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 48, memory_seq_rm [48, end)
+Oct 30 21:13:08 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     64, progress = 0.31, t =   4.76 s / 13.44 tokens per second
+Oct 30 21:13:08 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 64, memory_seq_rm [64, end)
+Oct 30 21:13:09 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     80, progress = 0.38, t =   5.97 s / 13.40 tokens per second
+Oct 30 21:13:09 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 80, memory_seq_rm [80, end)
+Oct 30 21:13:10 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =     96, progress = 0.46, t =   7.17 s / 13.39 tokens per second
+Oct 30 21:13:10 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 96, memory_seq_rm [96, end)
+Oct 30 21:13:11 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =    112, progress = 0.54, t =   8.39 s / 13.36 tokens per second
+Oct 30 21:13:11 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 112, memory_seq_rm [112, end)
+Oct 30 21:13:12 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =    128, progress = 0.61, t =   9.59 s / 13.34 tokens per second
+Oct 30 21:13:12 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 128, memory_seq_rm [128, end)
+Oct 30 21:13:14 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =    144, progress = 0.69, t =  10.81 s / 13.32 tokens per second
+Oct 30 21:13:14 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 144, memory_seq_rm [144, end)
+Oct 30 21:13:15 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =    160, progress = 0.77, t =  12.03 s / 13.30 tokens per second
+Oct 30 21:13:15 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 160, memory_seq_rm [160, end)
+Oct 30 21:13:16 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =    176, progress = 0.84, t =  13.25 s / 13.28 tokens per second
+Oct 30 21:13:16 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 176, memory_seq_rm [176, end)
+Oct 30 21:13:17 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =    192, progress = 0.92, t =  14.48 s / 13.26 tokens per second
+Oct 30 21:13:17 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 192, memory_seq_rm [192, end)
+Oct 30 21:13:19 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt processing, n_tokens =    208, progress = 1.00, t =  15.71 s / 13.24 tokens per second
+Oct 30 21:13:19 runnervm48cm3 ollama[2885]: slot   operator(): id  0 | task 0 | cached n_tokens = 208, memory_seq_rm [208, end)
+Oct 30 21:13:19 runnervm48cm3 ollama[2885]: slot init_sampler: id  0 | task 0 | init sampler, took 0.05 ms, tokens: text = 209, total = 209
+Oct 30 21:13:36 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    100, tg =   5.69 t/s, tg_3s =   5.75 t/s
+Oct 30 21:13:39 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    117, tg =   5.68 t/s, tg_3s =   5.63 t/s
+Oct 30 21:13:42 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    134, tg =   5.68 t/s, tg_3s =   5.65 t/s
+Oct 30 21:13:45 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    151, tg =   5.67 t/s, tg_3s =   5.61 t/s
+Oct 30 21:13:48 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    168, tg =   5.67 t/s, tg_3s =   5.65 t/s
+Oct 30 21:13:51 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    185, tg =   5.66 t/s, tg_3s =   5.63 t/s
+Oct 30 21:13:54 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    202, tg =   5.66 t/s, tg_3s =   5.62 t/s
+Oct 30 21:13:57 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    219, tg =   5.66 t/s, tg_3s =   5.63 t/s
+Oct 30 21:14:00 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    236, tg =   5.65 t/s, tg_3s =   5.59 t/s
+Oct 30 21:14:03 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    253, tg =   5.65 t/s, tg_3s =   5.63 t/s
+Oct 30 21:14:06 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    270, tg =   5.65 t/s, tg_3s =   5.65 t/s
+Oct 30 21:14:09 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    287, tg =   5.64 t/s, tg_3s =   5.48 t/s
+Oct 30 21:14:12 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    304, tg =   5.64 t/s, tg_3s =   5.58 t/s
+Oct 30 21:14:16 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | n_gen =    321, tg =   5.63 t/s, tg_3s =   5.46 t/s
+Oct 30 21:14:16 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 | prompt eval time =   15884.20 ms /   209 tokens (   76.00 ms per token,    13.16 tokens per second)
+Oct 30 21:14:16 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 |        eval time =   57229.33 ms /   323 tokens (  177.73 ms per token,     5.63 tokens per second)
+Oct 30 21:14:16 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 |       total time =   73113.53 ms /   532 tokens
+Oct 30 21:14:16 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 |    graphs reused =        333
+Oct 30 21:14:16 runnervm48cm3 ollama[2885]: slot print_timing: id  0 | task 0 |   graph reallocs =          0    /     0        (same size) / (changed size)
+Oct 30 21:14:16 runnervm48cm3 ollama[2885]: slot      release: id  0 | task 0 | stop processing: n_tokens = 531, truncated = 0
+Oct 30 21:14:16 runnervm48cm3 ollama[2885]: srv  update_slots: all slots are idle
+Oct 30 21:14:16 runnervm48cm3 ollama[2885]: [GIN] 2026/10/30 - 21:14:16 | 200 |    1m20s |       127.0.0.1 | POST     "/api/chat"

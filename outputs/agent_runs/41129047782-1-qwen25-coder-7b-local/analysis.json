@@ -1,0 +1,229 @@
+{
+  "schema_version": "1.0",
+  "generated_at_utc": "2026-10-30T21:14:21.791721+00:00",
+  "identity": {
+    "repository": "anuxlab/collab-cli-pipeline",
+    "workflow": "Local AI Agent Experiment — Qwen2.5-Coder 7B (Ollama)",
+    "run_id": "41129047782",
+    "run_attempt": "1",
+    "commit_sha": "2c69afa191e1b62bf0b24f308fa417e4721d5b7a",
+    "ref": "refs/heads/main",
+    "runner_os": "Linux",
+    "runner_arch": "X64"
+  },
+  "model": {
+    "requested": "qwen2.5-coder:7b-instruct-q4_K_M",
+    "backend": "local Ollama",
+    "quantization": "quantized Ollama model",
+    "context_tokens": "2048",
+    "generation_tokens": "1200",
+    "batch_size": "16"
+  },
+  "status": "passed",
+  "failure_classification": {
+    "code": "SUCCESS",
+    "explanation": "Agent generated and validated a working solution."
+  },
+  "stage_status": {
+    "ollama_setup": "success",
+    "model_pull": "success",
+    "model_check": "success",
+    "agent_step": "success"
+  },
+  "runner_resources": {
+    "cpu_count": 4,
+    "memory_kib": {
+      "MemTotal": 16367524,
+      "MemAvailable": 15283108,
+      "SwapTotal": 3145724,
+      "SwapFree": 3145724
+    },
+    "workspace_disk_bytes": {
+      "total": 154894188544,
+      "used": 63196467200,
+      "free": 91680944128
+    },
+    "gpu": {
+      "available": false,
+      "details": "No NVIDIA GPU detected; standard hosted runner uses CPU inference."
+    },
+    "runner_name": "GitHub Actions 1000001611",
+    "runner_os": "Linux",
+    "runner_arch": "X64"
+  },
+  "agent_summary": {
+    "experiment": "ai_notebook_code_repair",
+    "model": "qwen2.5-coder:7b-instruct-q4_K_M",
+    "inference_backend": "local_ollama",
+    "orchestrator": "langgraph",
+    "ollama_url": "http://127.0.0.1:11434",
+    "status": "passed",
+    "max_repairs": 2,
+    "attempts_used": 1,
+    "started_at_utc": "2026-10-30T21:12:56.027052+00:00",
+    "finished_at_utc": "2026-10-30T21:14:18.459423+00:00",
+    "metrics": {
+      "dataset": "breast_cancer",
+      "model": "LogisticRegression",
+      "accuracy": 0.986013986013986,
+      "precision": 0.9888888888888889,
+      "recall": 0.9888888888888889,
+      "f1": 0.9888888888888889,
+      "test_samples": 143
+    },
+    "final_execution": {
+      "returncode": 0,
+      "stdout": "{\"dataset\": \"breast_cancer\", \"model\": \"LogisticRegression\", \"accuracy\": 0.986013986013986, \"precision\": 0.9888888888888889, \"recall\": 0.9888888888888889, \"f1\": 0.9888888888888889, \"test_samples\": 143}\n",
+      "stderr": "",
+      "duration_seconds": 1.933,
+      "timed_out": false,
+      "sandbox": "docker-network-disabled",
+      "container_id": "14a08ed601e68f2e7e4bad16306d10903be08252a96b37c8765b0654f9c59980"
+    },
+    "final_validation": "passed",
+    "final_error": "",
+    "safety_note": "Workflow runs use a Docker container with networking disabled, resource limits, read-only root filesystem, and no credentials. Local fallback execution is not hardened."
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "started_at_utc": "2026-10-30T21:12:56.027052+00:00",
+      "orchestrator": "langgraph",
+      "model_call_status": "success",
+      "model_call_seconds": 82.378,
+      "model_performance": {
+        "prompt_tokens": 209,
+        "output_tokens": 323,
+        "prompt_eval_seconds": 15.884,
+        "generation_seconds": 57.229,
+        "total_seconds": 80.441,
+        "tokens_per_second": 5.644
+      },
+      "execution": {
+        "returncode": 0,
+        "stdout": "{\"dataset\": \"breast_cancer\", \"model\": \"LogisticRegression\", \"accuracy\": 0.986013986013986, \"precision\": 0.9888888888888889, \"recall\": 0.9888888888888889, \"f1\": 0.9888888888888889, \"test_samples\": 143}\n",
+        "stderr": "",
+        "duration_seconds": 1.933,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": "14a08ed601e68f2e7e4bad16306d10903be08252a96b37c8765b0654f9c59980"
+      },
+      "candidate_file": "generated_attempt_0.py",
+      "finished_at_utc": "2026-10-30T21:14:18.405405+00:00",
+      "validation": "passed",
+      "status": "passed",
+      "metrics": {
+        "dataset": "breast_cancer",
+        "model": "LogisticRegression",
+        "accuracy": 0.986013986013986,
+        "precision": 0.9888888888888889,
+        "recall": 0.9888888888888889,
+        "f1": 0.9888888888888889,
+        "test_samples": 143
+      }
+    }
+  ],
+  "ollama_model_list": {
+    "returncode": 0,
+    "stdout": "NAME                                ID              SIZE      MODIFIED           \nqwen2.5-coder:7b-instruct-q4_K_M    dae161e27b0e    4.7 GB    About a minute ago    \n",
+    "stderr": ""
+  },
+  "log_inventory": [
+    {
+      "file": "docker-cleanup.log",
+      "bytes": 145,
+      "lines": 3
+    },
+    {
+      "file": "model_check.log",
+      "bytes": 522,
+      "lines": 21
+    },
+    {
+      "file": "model_pull.log",
+      "bytes": 37842,
+      "lines": 257
+    },
+    {
+      "file": "ollama-install-stderr.log",
+      "bytes": 0,
+      "lines": 0
+    },
+    {
+      "file": "ollama-install.log",
+      "bytes": 5094,
+      "lines": 69
+    },
+    {
+      "file": "ollama-stop.log",
+      "bytes": 55,
+      "lines": 1
+    },
+    {
+      "file": "ollama-systemd.log",
+      "bytes": 38601,
+      "lines": 305
+    },
+    {
+      "file": "docker-images.txt",
+      "bytes": 738,
+      "lines": 8
+    },
+    {
+      "file": "final-disk.txt",
+      "bytes": 89,
+      "lines": 2
+    },
+    {
+      "file": "final-free-memory.txt",
+      "bytes": 207,
+      "lines": 3
+    },
+    {
+      "file": "model_check_status.txt",
+      "bytes": 15,
+      "lines": 1
+    },
+    {
+      "file": "model_pull_status.txt",
+      "bytes": 27,
+      "lines": 2
+    },
+    {
+      "file": "model_resource_gate.txt",
+      "bytes": 80,
+      "lines": 4
+    },
+    {
+      "file": "ollama-list-after-pull.txt",
+      "bytes": 175,
+      "lines": 2
+    },
+    {
+      "file": "ollama-ps.txt",
+      "bytes": 239,
+      "lines": 2
+    },
+    {
+      "file": "ollama_setup_status.txt",
+      "bytes": 15,
+      "lines": 1
+    },
+    {
+      "file": "stderr_attempt_0.txt",
+      "bytes": 0,
+      "lines": 0
+    },
+    {
+      "file": "stdout_attempt_0.txt",
+      "bytes": 201,
+      "lines": 1
+    },
+    {
+      "file": "swap-policy.txt",
+      "bytes": 87,
+      "lines": 1
+    }
+  ],
+  "recommended_next_action": "Compare this run against other models using metrics, attempts, and runtime."
+}
