@@ -84,3 +84,103 @@ def test_generate_execute_records_model_failure(monkeypatch, tmp_path):
     assert result["execution"]["returncode"] == 1
     assert "Ollama unavailable" in result["execution"]["stderr"]
     assert result["attempts"][0]["model_call_status"] == "failure"
+
+
+def test_web_research_node_injects_references_and_records_trace(monkeypatch, tmp_path):
+    fake_report = {
+        "provider": "ddgs", "query": "python docs", "status": "success",
+        "results": [{"title": "Python docs", "url": "https://docs.python.org", "snippet": "Official docs"}],
+        "error": None,
+    }
+    monkeypatch.setattr(agent, "search_web", lambda *a, **k: fake_report)
+    state = {
+        "web_search_enabled": True, "web_query": "python docs", "run_dir": str(tmp_path),
+        "messages": [{"role": "user", "content": "write code"}], "graph_trace": [],
+    }
+    result = agent.node_web_research(state)
+    assert result["web_research"]["status"] == "success"
+    assert "UNTRUSTED DATA" in result["messages"][-1]["content"]
+    assert result["graph_trace"][-1]["node"] == "web_research"
+    assert (tmp_path / "web_research.json").exists()
+
+
+def test_web_research_disabled_is_non_blocking(tmp_path):
+    state = {
+        "web_search_enabled": False, "web_query": "", "run_dir": str(tmp_path),
+        "messages": [{"role": "user", "content": "write code"}], "graph_trace": [],
+    }
+    result = agent.node_web_research(state)
+    assert result["web_research"]["status"] == "skipped"
+    assert len(result["messages"]) == 1
+
+
+def test_extract_web_search_request_is_bounded_and_removed():
+    query, remainder = agent.extract_web_search_request(
+        "Need current API details. <WEB_SEARCH>  sklearn Pipeline latest docs  </WEB_SEARCH>"
+    )
+    assert query == "sklearn Pipeline latest docs"
+    assert "WEB_SEARCH" not in remainder
+    assert "Need current API details." in remainder
+
+
+def test_model_can_autonomously_request_web_search(monkeypatch, tmp_path):
+    responses = iter([
+        "I need the current API. <WEB_SEARCH>scikit-learn Pipeline documentation</WEB_SEARCH>",
+        "```python\nprint('{\"dataset\":\"demo\",\"model\":\"test\",\"accuracy\":0.9,\"precision\":0.9,\"recall\":0.9,\"f1\":0.9,\"test_samples\":10}')\n```",
+    ])
+    monkeypatch.setattr(agent, "call_model", lambda *a, **k: next(responses))
+    monkeypatch.setattr(agent, "search_web", lambda *a, **k: {
+        "provider": "ddgs", "query": "scikit-learn Pipeline documentation", "status": "success",
+        "results": [{"title": "Official docs", "url": "https://scikit-learn.org/", "snippet": "Pipeline API"}],
+        "error": None,
+    })
+    monkeypatch.setattr(agent, "execute_code", lambda *a, **k: {
+        "returncode": 0, "stdout": "{}", "stderr": "", "duration_seconds": 0.01,
+        "timed_out": False, "sandbox": "test",
+    })
+    state = {
+        "model": "test-model", "run_dir": str(tmp_path), "workdir": str(tmp_path),
+        "messages": [{"role": "user", "content": "Build a model"}], "attempt_index": 0,
+        "max_repairs": 5, "execution_timeout": 10, "api_timeout": 10,
+        "ollama_url": "http://127.0.0.1:11434", "attempts": [], "graph_trace": [],
+        "web_search_enabled": True, "web_search_count": 0,
+    }
+    result = agent.node_generate_execute(state)
+    assert result["web_search_count"] == 1
+    assert result["attempts"][0]["web_searches"][0]["status"] == "success"
+    assert any(item["node"] == "agent_web_search_tool" for item in result["graph_trace"])
+
+
+def test_five_repairs_allow_six_total_generation_attempts():
+    assert agent.route_after_diagnosis({"status": "repairing", "attempt_index": 5, "max_repairs": 5}) == "continue"
+    assert agent.route_after_diagnosis({"status": "failed", "attempt_index": 6, "max_repairs": 5}) == "finish"
+
+
+def test_dspy_plan_formatter_adds_structured_checklist():
+    from scripts.dspy_planner import format_task_plan
+    rendered = format_task_plan({
+        "status": "success",
+        "implementation_plan": "1. Load data\n2. Train model",
+        "acceptance_criteria": "Print accuracy JSON",
+        "edge_cases": "Empty input; missing values",
+    })
+    assert "Implementation plan" in rendered
+    assert "Acceptance criteria" in rendered
+    assert "Empty input" in rendered
+    assert "verify every acceptance criterion" in rendered
+
+
+def test_dspy_planner_fails_open_when_package_missing(monkeypatch):
+    import builtins
+    from scripts import dspy_planner
+    original_import = builtins.__import__
+
+    def blocked_import(name, *args, **kwargs):
+        if name == "dspy":
+            raise ImportError("intentionally unavailable")
+        return original_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", blocked_import)
+    result = dspy_planner.build_task_plan("task", "model", "http://localhost:11434")
+    assert result["status"] == "unavailable"
+    assert "not installed" in result["error"]

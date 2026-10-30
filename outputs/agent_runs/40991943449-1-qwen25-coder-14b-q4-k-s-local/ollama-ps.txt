@@ -1,2 +1,0 @@
-NAME                                 ID              SIZE      PROCESSOR    CONTEXT    RUNNER      UNTIL              
-qwen2.5-coder:14b-instruct-q4_K_S    9214d9fd3ff9    9.0 GB    100% CPU     2048       llamacpp    4 minutes from now    

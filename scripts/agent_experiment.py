@@ -246,13 +246,13 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", required=True)
     parser.add_argument("--run-dir", required=True)
-    parser.add_argument("--max-repairs", type=int, default=2)
+    parser.add_argument("--max-repairs", type=int, default=5)
     parser.add_argument("--execution-timeout", type=int, default=60)
     parser.add_argument("--api-timeout", "--model-timeout", dest="api_timeout", type=int, default=300)
     parser.add_argument("--ollama-url", default=os.environ.get("OLLAMA_BASE_URL", DEFAULT_OLLAMA_URL))
     args = parser.parse_args()
-    if not 0 <= args.max_repairs <= 2:
-        print("--max-repairs must be between 0 and 2", file=sys.stderr)
+    if not 0 <= args.max_repairs <= 5:
+        print("--max-repairs must be between 0 and 5", file=sys.stderr)
         return 2
 
     run_dir = Path(args.run_dir).resolve()

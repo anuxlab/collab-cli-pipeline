@@ -1,1 +1,0 @@
-/home/runner/work/_temp/f5e957c0-3e6f-41d2-8da0-9ac18e973585.sh: line 10: ollama: command not found

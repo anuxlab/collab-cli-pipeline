@@ -229,3 +229,39 @@ The `agent-high-end-reasoning.yml` workflow has been repurposed as the resource-
 ### Two-model collaboration
 
 A two-SLM setup is feasible on a free runner if the models are used **sequentially**, not kept resident together. A practical pattern is: (1) a 3B/4B model drafts code, (2) unload it, (3) a 7B model reviews the code and produces a concise critique, and (4) the first model (or the reviewer) applies the critique before sandbox execution. In a GitHub Actions design, each model can also run in its own sequential job with an artifact hand-off; each job downloads only its own model. This costs two model downloads on a cold cache and increases wall-clock time, but avoids simultaneous model RAM pressure. A parallel two-model setup is not recommended on standard free hosted runners.
+
+## Optional keyless web research for coding agents
+
+The LangGraph agent includes an optional research node powered by the open-source
+[`ddgs`](https://github.com/deedy5/ddgs) Python metasearch package (MIT license).
+It queries public search backends without a paid API key or a separately hosted
+search service. This is best-effort community metasearch, not an SLA-backed search
+API; public backends can rate-limit or temporarily block automated requests.
+
+To enable research in a manually dispatched model workflow:
+
+1. Set **Enable free keyless web research** to `true`.
+2. Supply a focused **Search query** (for example, `scikit-learn Pipeline API documentation`).
+3. Run the selected model workflow as usual.
+
+The `web_research` LangGraph node runs before generation. It saves `web_research.json`
+and `web_research.md`, records its status in `graph_trace.json` and `summary.json`,
+and adds bounded snippets plus source URLs to the model context. Search failures
+are non-fatal: the agent continues without web context and records the diagnostic.
+
+Search results are explicitly treated as untrusted reference material, not instructions.
+Generated code still executes in the Docker sandbox with networking disabled. Web
+search happens in the trusted orchestration process, outside that sandbox. Search
+is disabled by default to avoid unnecessary network calls on tasks that do not need
+current documentation. Install dependency: `ddgs>=9.14,<10`.
+
+## Optional DSPy structured planning
+
+The manual agent workflows include an `enable_dspy_planning` switch (off by default). When enabled, the workflow installs `requirements-dspy.txt` and asks DSPy to produce a concise implementation plan, observable acceptance criteria, and edge cases using the **same local Ollama model** through Ollama's OpenAI-compatible `/v1` endpoint. The plan is added as a checklist before the normal LangGraph generate/execute/diagnose/repair loop.
+
+- No hosted API key or paid model is used; the local Ollama endpoint is the only LM backend.
+- DSPy adds one extra model call and may increase run time, so it is opt-in on free hosted runners.
+- If DSPy is unavailable or the planning call fails, the agent records the failure and continues with its normal prompt.
+- The complete planner result is recorded in `summary.json` under `dspy_planning`.
+- Enable it for controlled comparisons; compare otherwise-identical runs with planning on and off.
+

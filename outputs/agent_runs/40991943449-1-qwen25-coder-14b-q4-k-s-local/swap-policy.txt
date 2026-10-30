@@ -1,1 +1,0 @@
-No temporary swapfile is created; swap-backed inference can thrash hosted-runner disk.

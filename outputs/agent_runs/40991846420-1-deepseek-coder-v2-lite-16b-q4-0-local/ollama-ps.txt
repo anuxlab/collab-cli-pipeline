@@ -1,2 +1,0 @@
-NAME                                        ID              SIZE      PROCESSOR    CONTEXT    RUNNER      UNTIL               
-deepseek-coder-v2:16b-lite-instruct-q4_0    63fb193b3a9b    9.2 GB    100% CPU     2048       llamacpp    55 seconds from now    

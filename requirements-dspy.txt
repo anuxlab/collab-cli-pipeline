@@ -1,0 +1,3 @@
+# Optional structured task planning via DSPy + the existing local Ollama model.
+# Install only when enable_dspy_planning is selected in workflow_dispatch.
+dspy>=2.6,<4

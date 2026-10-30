@@ -10,3 +10,6 @@ nbformat>=5.9,<6
 
 # LangGraph controls local-model generate/execute/diagnose/repair iterations.
 langgraph>=0.2,<2
+
+# Optional keyless web research for the LangGraph coding agent.
+ddgs>=9.14,<10
