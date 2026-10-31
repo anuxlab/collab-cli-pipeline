@@ -114,3 +114,38 @@ def test_json_object_after_logs_and_nested_braces_is_accepted():
     assert ok is True
     assert reason == "passed"
     assert metrics["accuracy"] == 0.9
+
+
+def test_docker_infrastructure_errors_are_classified_without_code_repair():
+    from scripts.agent_experiment import _is_docker_infrastructure_error
+    assert _is_docker_infrastructure_error("docker: failed to create the container ID file: no such file")
+    assert _is_docker_infrastructure_error("Cannot connect to the Docker daemon")
+    assert not _is_docker_infrastructure_error("Traceback: ValueError: invalid input")
+
+
+def test_docker_cidfile_uses_absolute_existing_parent(tmp_path, monkeypatch):
+    from scripts import agent_experiment
+    import os
+    monkeypatch.setenv("AGENT_USE_DOCKER", "1")
+    monkeypatch.setenv("AGENT_SANDBOX_IMAGE", "test-image")
+    captured = {}
+    class Result:
+        returncode = 0
+        stdout = "ok"
+        stderr = ""
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        captured["cwd"] = kwargs["cwd"]
+        cid = Path(command[command.index("--cidfile") + 1])
+        captured["cidfile"] = cid
+        assert cid.is_absolute()
+        assert cid.parent.is_dir()
+        cid.write_text("container-id")
+        return Result()
+    monkeypatch.setattr(agent_experiment.subprocess, "run", fake_run)
+    monkeypatch.setattr(agent_experiment.os, "getuid", lambda: 1000)
+    monkeypatch.setattr(agent_experiment.os, "getgid", lambda: 1000)
+    result = agent_experiment.execute_code("print('ok')", tmp_path, 10)
+    assert result["returncode"] == 0
+    assert captured["cwd"] == tmp_path.resolve()
+    assert not captured["cidfile"].exists()

@@ -289,7 +289,9 @@ python scripts/notebook_benchmark.py \
   --task-set all --max-repairs 2
 ```
 
-The benchmark creates one notebook per task, preserves the generated source order, executes the source in the isolated sandbox, and records each attempt. It scores execution, task-specific structured output, rubric coverage, notebook cell structure, source reconstruction, and semantic-section diversity. Failed tasks receive targeted repair feedback. Outputs include `benchmark_summary.json`, per-task reports, every generated script, and every notebook attempt.
+The benchmark creates one notebook per task, preserves generated source order, executes the source in the isolated sandbox, and records every attempt. It scores Python syntax, successful execution, task-specific structured output, rubric coverage, notebook cell structure, source reconstruction, and semantic-section diversity as separate components. Task ID/title are embedded in notebook metadata and task context refines section names for classification, regression, time series, NLP and optimization.
+
+**Infrastructure errors are not model errors.** Docker daemon/image/CID-file/mount failures are classified as `infrastructure`, not sent back to the model for repair. The benchmark stops inference immediately and marks remaining tasks as `infrastructure_blocked`. It performs a Docker daemon and sandbox-image preflight before spending any model calls. This prevents a broken runner from consuming the repair budget.
 
 ### DSPy automatic prompt optimization
 
@@ -304,9 +306,24 @@ python scripts/notebook_benchmark.py \
   --task-set all --max-repairs 2 --dspy-optimize
 ```
 
-This runs the baseline suite, uses DSPy `BootstrapFewShot` to optimize a task-specific notebook-planning module from a training subset, then reruns the suite with generated guidance. It writes `dspy_optimization.json` and `baseline_vs_dspy.json`; the latter reports both overall and held-out task score deltas. DSPy uses the same local Ollama endpoint and does not require a hosted API key. Optimization adds inference calls and is therefore opt-in on GitHub-hosted runners.
+This runs the baseline suite, selects only successfully executed baseline notebooks as DSPy demonstrations, and uses `BootstrapFewShot` to optimize a task-specific notebook-planning module. A deterministic rotating holdout is excluded from the demonstrations. The optimizer's labels are derived from actual notebook headings, rubric checks and structured execution results—not synthetic task-title/rubric templates. It then reruns the same task set with generated guidance. It writes `dspy_optimization.json` and `baseline_vs_dspy.json`; comparisons include per-task deltas, seed, training/holdout IDs and infrastructure-blocked counts. If fewer than two successful baseline examples exist, optimization is marked `insufficient_baseline_evidence` and the second generation pass is skipped. DSPy uses the same local Ollama endpoint and no hosted API key.
 
-**Evaluation caution:** the score is a transparent engineering rubric, not a scientific measure of creativity. The optimizer's metric is rubric-grounded and the first experiment is exploratory. Repeat runs with multiple seeds, rotate held-out task splits, and manually inspect correctness and interpretation before concluding that DSPy improved reasoning.
+**Evaluation caution:** the score is a transparent engineering rubric, not a scientific measure of creativity. Use the same `--seed` for baseline and optimized runs; change `--seed` and `--holdout-rotation` between repeated experiments. Compare only runs with zero infrastructure-blocked tasks. Manually inspect correctness and interpretation before concluding that DSPy improved reasoning.
+
+The benchmark supports explicit phases so expensive work can be isolated:
+
+```bash
+# Phase 1: baseline only (no duplicate run)
+python scripts/notebook_benchmark.py --model qwen2.5-coder:7b --output-dir outputs/exp --phase baseline --seed 42
+
+# Phase 2: DSPy optimization from the saved baseline
+python scripts/notebook_benchmark.py --model qwen2.5-coder:7b --output-dir outputs/exp --phase optimize --baseline-dir outputs/exp/baseline --dspy-optimize --holdout-rotation 1
+
+# Phase 3: optimized evaluation, using saved guidance
+python scripts/notebook_benchmark.py --model qwen2.5-coder:7b --output-dir outputs/exp --phase optimized --baseline-dir outputs/exp/baseline --guidance-file outputs/exp/dspy_optimization.json --seed 42
+```
+
+`--phase all --dspy-optimize` runs the three phases in one workflow. `--phase all` without `--dspy-optimize` runs only the baseline, avoiding an accidental duplicate benchmark.
 
 ### Detecting template collapse across models
 
@@ -329,4 +346,4 @@ The four manual agent workflows now expose:
 - `notebook_task_set` — `simple`, `complex`, or `all`.
 - `enable_dspy_prompt_optimization` — run baseline-vs-DSPy optimization (requires the benchmark to be enabled).
 
-The benchmark uses the same already-pulled local model and Docker sandbox. It is intentionally optional because the full suite plus optimization can take many model calls on CPU-only free runners. Benchmark artifacts are stored under the workflow run directory.
+The benchmark uses the same already-pulled local model and Docker sandbox. Notebook benchmark jobs use Ubuntu 24.04 and a 180-minute job timeout. Inputs `notebook_seed` and `notebook_holdout_rotation` support reproducible repeats and rotated holdouts. Memory monitoring now samples Ollama runner RSS (rather than the small Ollama daemon RSS) and whole-job cgroup memory; both metrics are clearly distinguished in `peak_memory.json`. The full suite plus optimization remains optional because it can take many model calls on CPU-only free runners. Benchmark artifacts are stored under the workflow run directory.

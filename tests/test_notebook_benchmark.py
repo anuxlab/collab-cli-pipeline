@@ -55,3 +55,41 @@ def test_model_similarity_flags_near_identical_code():
     different = "from itertools import combinations\nprint(list(combinations(range(8), 2)))\n"
     assert similarity(first, second) > 0.85
     assert similarity(first, different) < similarity(first, second)
+
+
+def test_infrastructure_failure_is_not_scored_as_model_execution_failure(tmp_path):
+    task = TASKS[0]
+    source = "print('candidate')\n"
+    output = tmp_path / "infra.ipynb"
+    create_generated_notebook(source, output, model="test", status="failed", orchestrator="test")
+    score = score_task(task, source, {
+        "returncode": 125, "timed_out": False, "infrastructure_error": True,
+        "stdout": "", "stderr": "docker failed to create container id file",
+    }, output)
+    assert score["infrastructure_error"] is True
+    assert score["failure_category"] == "infrastructure"
+    assert score["execution_ok"] is False
+
+
+def test_docker_preflight_is_skipped_when_local_subprocess_mode(monkeypatch):
+    from scripts.notebook_benchmark import docker_preflight
+    monkeypatch.delenv("AGENT_USE_DOCKER", raising=False)
+    assert docker_preflight()["status"] == "not_required"
+
+
+def test_infrastructure_failure_stops_repairs_and_blocks_remaining_tasks(tmp_path, monkeypatch):
+    import scripts.notebook_benchmark as benchmark
+    calls = {"model": 0, "execution": 0}
+    def fake_model(*args, **kwargs):
+        calls["model"] += 1
+        return "print('candidate')"
+    def fake_execute(*args, **kwargs):
+        calls["execution"] += 1
+        return {"returncode": 125, "stdout": "", "stderr": "docker: failed to create the container ID file",
+                "timed_out": False, "infrastructure_error": True}
+    monkeypatch.setattr(benchmark, "call_model", fake_model)
+    monkeypatch.setattr(benchmark, "execute_code", fake_execute)
+    summary = benchmark.run_benchmark("test-model", tmp_path, "http://localhost:11434", 30, 5, TASKS[:2])
+    assert calls == {"model": 1, "execution": 1}
+    assert summary["infrastructure_blocked"] == 2
+    assert summary["completed_task_count"] == 1

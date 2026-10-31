@@ -42,6 +42,9 @@ SECTION_GUIDES = {
     "Optimization problem formulation": "Define decision variables, objective, constraints and feasibility conditions.",
     "Optimization algorithms and heuristics": "Solve the optimization problem and compare exact methods with practical heuristics.",
     "Solution verification": "Verify feasibility, objective values and optimality against independent checks.",
+    "Classification model fitting": "Fit classification models and compare them against a transparent baseline.",
+    "Regression model fitting": "Fit regression estimators and compare their generalization behaviour.",
+    "NLP representation and model fitting": "Build text representations and fit sentiment models without leaking evaluation data.",
 }
 
 # Ordered from specific to general. These are semantic hints, not mandatory
@@ -69,7 +72,7 @@ def _node_source(node: ast.AST, lines: list[str]) -> str:
     return "".join(lines[start:end])
 
 
-def _semantic_section(node: ast.AST, source: str) -> str:
+def _semantic_section(node: ast.AST, source: str, task_context: str = "") -> str:
     """Infer a meaningful section from names, calls, comments and AST shape."""
     if isinstance(node, (ast.Import, ast.ImportFrom)):
         return "Environment and imports"
@@ -87,7 +90,7 @@ def _semantic_section(node: ast.AST, source: str) -> str:
         if isinstance(node.test.left, ast.Name) and node.test.left.id == "__name__":
             return "Experiment execution"
 
-    text = (source + " " + ast.dump(node, include_attributes=False)).lower()
+    text = (task_context + " " + source + " " + ast.dump(node, include_attributes=False)).lower()
     # Respect explicit notebook-style section comments and common generated labels.
     comment_match = re.search(r"(?im)^\s*#\s*(?:section\s*:\s*|%%\s*)?([a-z][a-z0-9 /&_-]{3,70})\s*$", source)
     if comment_match:
@@ -145,7 +148,7 @@ def _stable_cell_id(kind: str, source: str, index: int) -> str:
     return f"{kind}-{digest}"
 
 
-def build_notebook_cells(source: str) -> list[Any]:
+def build_notebook_cells(source: str, task_context: str = "") -> list[Any]:
     """Split valid Python into semantic, ordered notebook sections."""
     try:
         tree = ast.parse(source)
@@ -173,7 +176,15 @@ def build_notebook_cells(source: str) -> list[Any]:
     for node in nodes:
         start = max(0, getattr(node, "lineno", 1) - 1)
         end = getattr(node, "end_lineno", getattr(node, "lineno", 1))
-        section = _semantic_section(node, _node_source(node, lines))
+        section = _semantic_section(node, _node_source(node, lines), task_context)
+        context = task_context.lower()
+        # Refine generic AST labels with the benchmark's known task domain.
+        if "nlp" in context and section in {"Model training", "Model definition and initialization"}:
+            section = "NLP representation and model fitting"
+        elif "classification" in context and "nlp" not in context and section == "Model training":
+            section = "Classification model fitting"
+        elif "regression" in context and section == "Model training":
+            section = "Regression model fitting"
         if current_section is None:
             current_section, group_start, group_end = section, previous_end, end
         elif section == current_section and (start - int(group_end or 0)) <= 2:
@@ -210,6 +221,8 @@ def create_generated_notebook(
     status: str,
     orchestrator: str,
     execution: dict | None = None,
+    task_id: str | None = None,
+    task_title: str | None = None,
 ) -> None:
     nb = nbformat.v4.new_notebook()
     nb.metadata = {
@@ -217,14 +230,16 @@ def create_generated_notebook(
         "language_info": {"name": "python", "version": "3"},
         "collab_cli_agent": {
             "model": model, "status": status, "orchestrator": orchestrator,
-            "notebook_layout": "semantic_multi_cell_v2",
+            "notebook_layout": "semantic_multi_cell_v3_task_aware",
             "execution_order_preserved": True,
             "generation_method": "python_ast_semantic_segmentation",
+            "task_id": task_id,
+            "task_title": task_title,
         },
     }
     intro = (
         "# Generated Computational Notebook\n\n"
-        f"**Model:** `{model}`  \n**Orchestrator:** `{orchestrator}`  \n**Agent status:** `{status}`\n\n"
+        f"**Model:** `{model}`  \n**Orchestrator:** `{orchestrator}`  \n**Agent status:** `{status}`  \n**Task:** `{task_title or task_id or 'unspecified'}`\n\n"
         "## How to use this notebook\n\n"
         "1. Select a Python 3 kernel and install any dependencies not already available.\n"
         "2. Run cells from top to bottom; cells preserve the original script's execution order.\n"
@@ -235,7 +250,7 @@ def create_generated_notebook(
     intro_cell = nbformat.v4.new_markdown_cell(intro)
     intro_cell.id = "experiment-readme"
     intro_cell.metadata["tags"] = ["collab-cli-intro"]
-    nb.cells = [intro_cell, *build_notebook_cells(source)]
+    nb.cells = [intro_cell, *build_notebook_cells(source, " ".join(x for x in (task_id or "", task_title or "") if x))]
 
     if execution:
         code_cells = [cell for cell in nb.cells if cell.cell_type == "code"]

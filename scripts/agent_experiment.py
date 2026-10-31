@@ -96,10 +96,25 @@ def call_model(model: str, messages: list[dict], timeout: int, base_url: str | N
         raise RuntimeError(f"Unexpected local Ollama response: {json.dumps(data)[:1200]}") from exc
 
 
+def _is_docker_infrastructure_error(stderr: str) -> bool:
+    """Recognize sandbox startup failures that must never trigger code repair."""
+    text = (stderr or "").lower()
+    markers = (
+        "failed to create the container id file", "error response from daemon",
+        "cannot connect to the docker daemon", "is the docker daemon running",
+        "no such image", "pull access denied", "image not found",
+        "invalid mount config", "permission denied", "error creating overlay mount",
+        "failed to mount", "cannot create", "no space left on device",
+    )
+    return any(marker in text for marker in markers)
+
+
 def execute_code(code: str, workdir: Path, timeout: int) -> dict:
     """Execute a candidate with per-attempt Docker identity and guaranteed cleanup."""
     import uuid
 
+    workdir = Path(workdir).expanduser().resolve()
+    workdir.mkdir(parents=True, exist_ok=True)
     script = workdir / "generated_solution.py"
     script.write_text(code, encoding="utf-8")
     safe_env = {
@@ -113,7 +128,11 @@ def execute_code(code: str, workdir: Path, timeout: int) -> dict:
     started = time.monotonic()
     use_docker = os.environ.get("AGENT_USE_DOCKER", "0") == "1"
     # Never reuse a cidfile across attempts: stale files make docker run fail before execution.
-    cidfile = workdir / f"agent-container-{uuid.uuid4().hex}.cid"
+    # Docker creates --cidfile itself before the container starts. It requires an
+    # existing parent directory and an absolute host path; relative paths are
+    # interpreted inconsistently when subprocess cwd is also changed.
+    cidfile = (workdir / f"agent-container-{uuid.uuid4().hex}.cid").resolve()
+    cidfile.parent.mkdir(parents=True, exist_ok=True)
     container_id = ""
     image = os.environ.get("AGENT_SANDBOX_IMAGE", "collab-agent-sandbox:latest")
     if use_docker:
@@ -141,6 +160,7 @@ def execute_code(code: str, workdir: Path, timeout: int) -> dict:
             "duration_seconds": round(time.monotonic() - started, 3), "timed_out": False,
             "sandbox": "docker-network-disabled" if use_docker else "local-subprocess-not-hardened",
             "container_id": container_id or None,
+            "infrastructure_error": bool(use_docker and result.returncode != 0 and _is_docker_infrastructure_error(result.stderr)),
         }
     except subprocess.TimeoutExpired as exc:
         if cidfile.exists():

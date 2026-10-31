@@ -69,6 +69,21 @@ on:
         type: boolean
         required: true
         default: false
+      notebook_seed:
+        description: "Reproducibility seed shared by baseline and optimized notebook runs"
+        type: string
+        required: true
+        default: "42"
+      notebook_holdout_rotation:
+        description: "Rotate DSPy held-out tasks for repeated prompt-optimization experiments"
+        type: choice
+        required: true
+        default: "0"
+        options:
+          - "0"
+          - "1"
+          - "2"
+          - "3"
 
 permissions:
   contents: read
@@ -79,8 +94,8 @@ concurrency:
 
 jobs:
   agent:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
     outputs:
       run_dir: ${{ steps.meta.outputs.run_dir }}
       artifact_name: ${{ steps.meta.outputs.artifact_name }}
@@ -331,16 +346,10 @@ jobs:
           RUN_DIR: ${{ steps.meta.outputs.run_dir }}
         shell: bash
         run: |
-          (
-            peak_kb=0
-            while [ ! -f "$RUN_DIR/.stop_memory_monitor" ]; do
-              rss_kb=$(ps -C ollama -o rss= 2>/dev/null | awk '{s+=$1} END {print s+0}')
-              [ "$rss_kb" -gt "$peak_kb" ] && peak_kb=$rss_kb
-              printf '%s,%s\n' "$(date -u +%FT%TZ)" "$rss_kb" >> "$RUN_DIR/ollama_memory_samples.csv"
-              sleep 3
-            done
-            printf '{"peak_ollama_rss_kib":%s}\n' "$peak_kb" > "$RUN_DIR/peak_memory.json"
-          ) &
+          python scripts/monitor_ollama_memory.py \
+            --output "$RUN_DIR/ollama_memory_samples.csv" \
+            --stop-file "$RUN_DIR/.stop_memory_monitor" \
+            --interval 2 &
           echo $! > "$RUN_DIR/.memory_monitor_pid"
 
       - name: Progressive notebook-generation benchmark
@@ -353,6 +362,8 @@ jobs:
           RUN_DIR: ${{ steps.meta.outputs.run_dir }}/notebook_benchmark
           MODEL_TIMEOUT: ${{ inputs.model_timeout }}
           TASK_SET: ${{ inputs.notebook_task_set }}
+          NOTEBOOK_SEED: ${{ inputs.notebook_seed }}
+          NOTEBOOK_HOLDOUT_ROTATION: ${{ inputs.notebook_holdout_rotation }}
           ENABLE_DSPY_OPTIMIZATION: ${{ inputs.enable_dspy_prompt_optimization }}
           AGENT_USE_DOCKER: "1"
           AGENT_SANDBOX_IMAGE: collab-agent-sandbox:latest
@@ -368,6 +379,9 @@ jobs:
             --timeout "$MODEL_TIMEOUT" \
             --max-repairs 2 \
             --task-set "$TASK_SET" \
+            --phase all \
+            --seed "$NOTEBOOK_SEED" \
+            --holdout-rotation "$NOTEBOOK_HOLDOUT_ROTATION" \
             "${OPTIMIZER_ARGS[@]}"
 
       - name: Generate, execute, diagnose, and repair
@@ -507,7 +521,7 @@ jobs:
       cancel-in-progress: false
     if: always() && needs.agent.outputs.run_dir != ''
     needs: agent
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       actions: read

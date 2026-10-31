@@ -13,7 +13,8 @@ from typing import Any
 
 
 def optimize_notebook_prompts(training_tasks: list[dict[str, Any]], target_tasks: list[dict[str, Any]], model: str, ollama_url: str,
-                              output_path: str | Path, timeout: int = 180) -> dict[str, Any]:
+                              output_path: str | Path, timeout: int = 180,
+                              baseline_reports: list[dict[str, Any]] | None = None) -> dict[str, Any]:
     try:
         import dspy
     except ImportError as exc:
@@ -39,22 +40,54 @@ def optimize_notebook_prompts(training_tasks: list[dict[str, Any]], target_tasks
                 return self.plan(task_prompt=task_prompt,rubric=rubric)
 
         def metric(example,prediction,trace=None):
-            text=" ".join(str(getattr(prediction,k,"")) for k in ("design_strategy","validation_plan","differentiation")).lower()
+            fields = [str(getattr(prediction,k,"" )).strip() for k in
+                      ("design_strategy","validation_plan","differentiation")]
+            text = " ".join(fields).lower()
             terms=[x.strip().lower() for x in str(example.rubric).split(",") if x.strip()]
             coverage=sum(term in text for term in terms)/max(1,len(terms))
-            structure=sum(bool(str(getattr(prediction,k," ")).strip()) for k in ("design_strategy","validation_plan","differentiation"))/3
-            specificity=1.0 if len(str(getattr(prediction,"differentiation","")))>=45 else 0.0
-            return 0.55*coverage+0.30*structure+0.15*specificity
+            structure=sum(len(value) >= 45 for value in fields)/3
+            action_verbs = ("compare", "assert", "plot", "split", "inspect", "compute", "verify",
+                            "fit", "report", "diagnose", "measure", "validate", "analyze", "estimate")
+            actionability = min(1.0, sum(text.count(verb) for verb in action_verbs) / 5.0)
+            differentiation = fields[2].lower()
+            distinct_terms = sum(term in differentiation for term in terms)
+            generic = any(phrase in differentiation for phrase in
+                          ("standard ml pipeline", "generic workflow", "use appropriate methods", "follow best practices"))
+            specificity = min(1.0, distinct_terms / 2.0) * (0.0 if generic else 1.0)
+            uniqueness = 1.0 if len(set(value[:100] for value in fields)) == 3 else 0.0
+            return 0.40*coverage + 0.20*structure + 0.15*actionability + 0.20*specificity + 0.05*uniqueness
 
-        # Rubric-grounded labels seed the bootstrap optimizer; the metric independently
-        # checks that proposed plans address task criteria and contain all three fields.
+        # Bootstrap only from actual successful baseline artifacts. This avoids
+        # teaching DSPy synthetic "ideal" plans that merely echo the rubric.
+        reports_by_id = {
+            r.get("task", {}).get("id"): r for r in (baseline_reports or [])
+        }
         train=[]
         for task in training_tasks:
-            rubric=", ".join(task.get("rubric",[]))
-            train.append(dspy.Example(task_prompt=task["prompt"],rubric=rubric,
-                design_strategy=f"Build a workflow specific to {task['title']}; organize around {rubric}.",
-                validation_plan=f"Assert and report evidence for {rubric}; validate data assumptions and numerical outputs.",
-                differentiation=f"Use the task's distinctive methods and diagnostics: {rubric}, not a generic classification workflow.").with_inputs("task_prompt","rubric"))
+            report = reports_by_id.get(task["id"], {})
+            score = report.get("final_score", {})
+            if not (score.get("execution_ok") and score.get("task_result_ok")):
+                continue
+            hits = score.get("rubric_hits", [])
+            headings = score.get("section_headings", [])
+            result = score.get("result") or {}
+            # These labels summarize observed successful work, not fabricated
+            # reference solutions. The prompt optimizer learns useful patterns
+            # from executable notebooks and their measured evidence.
+            train.append(dspy.Example(
+                task_prompt=task["prompt"],
+                rubric=", ".join(task.get("rubric", [])),
+                design_strategy=("Successful baseline structure: " + "; ".join(headings[:8]) +
+                                 ". Observed result keys: " + ", ".join(sorted(result.keys()))),
+                validation_plan=("Successful baseline checks covered: " + ", ".join(hits) +
+                                 ". Preserve execution, structured output and independent assertions."),
+                differentiation=("Observed task-specific implementation for " + task["title"] +
+                                 "; use its measured methods and diagnostics rather than a generic ML template."),
+            ).with_inputs("task_prompt", "rubric"))
+        if len(train) < 2:
+            return {"status":"insufficient_baseline_evidence","optimizer":"DSPy BootstrapFewShot",
+                    "model":model,"successful_training_examples":len(train),"guidance":{},
+                    "error":"At least two successfully executed baseline notebooks are required for evidence-grounded prompt optimization."}
         planner=NotebookPlanner()
         optimizer=dspy.BootstrapFewShot(metric=metric,max_bootstrapped_demos=2,max_labeled_demos=min(4,len(train)),
                                         max_rounds=1,metric_threshold=0.55)

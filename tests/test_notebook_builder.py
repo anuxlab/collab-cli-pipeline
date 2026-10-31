@@ -25,7 +25,7 @@ def test_notebook_metadata_and_outputs_are_valid(tmp_path):
     )
     notebook = nbformat.read(path, as_version=4)
     nbformat.validate(notebook)
-    assert notebook.metadata.collab_cli_agent.notebook_layout == "semantic_multi_cell_v2"
+    assert notebook.metadata.collab_cli_agent.notebook_layout == "semantic_multi_cell_v3_task_aware"
     assert len([cell for cell in notebook.cells if cell.cell_type == "code"]) >= 2
     assert notebook.cells[-1].outputs[0].text == '{"value": 42}\n'
 
@@ -138,3 +138,15 @@ assert is_feasible
     headings = [c.source.splitlines()[0] for c in build_notebook_cells(source) if c.cell_type == "markdown"]
     assert any("Optimization problem formulation" in h for h in headings)
     assert any("Solution verification" in h for h in headings)
+
+
+def test_task_context_is_recorded_in_notebook_metadata_and_intro(tmp_path):
+    output = tmp_path / "task.ipynb"
+    create_generated_notebook(
+        "import pandas as pd\nvalues = [1, 2, 3]\nprint(values)\n",
+        output, model="test", status="passed", orchestrator="test",
+        task_id="06_nlp_text_classification", task_title="Small-data NLP sentiment analysis",
+    )
+    notebook = nbformat.read(output, as_version=4)
+    assert notebook.metadata.collab_cli_agent.task_id == "06_nlp_text_classification"
+    assert "Small-data NLP sentiment analysis" in notebook.cells[0].source
