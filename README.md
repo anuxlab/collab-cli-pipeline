@@ -347,3 +347,26 @@ The four manual agent workflows now expose:
 - `enable_dspy_prompt_optimization` — run baseline-vs-DSPy optimization (requires the benchmark to be enabled).
 
 The benchmark uses the same already-pulled local model and Docker sandbox. Notebook benchmark jobs use Ubuntu 24.04 and a 180-minute job timeout. Inputs `notebook_seed` and `notebook_holdout_rotation` support reproducible repeats and rotated holdouts. Memory monitoring now samples Ollama runner RSS (rather than the small Ollama daemon RSS) and whole-job cgroup memory; both metrics are clearly distinguished in `peak_memory.json`. The full suite plus optimization remains optional because it can take many model calls on CPU-only free runners. Benchmark artifacts are stored under the workflow run directory.
+
+
+## October 31, 2026: Qwen 7B benchmark runtime optimization
+
+See [`RUN_41168974567_41169474521_DIAGNOSIS.md`](RUN_41168974567_41169474521_DIAGNOSIS.md) for the evidence-based diagnosis and comparison with successful run `40991943449`. The Qwen 7B workflow now defaults to the two-task smoke suite, one repair, a 900-token generation cap, and serialized runs per Git ref. Select `all` explicitly for the full seven-task suite. Notebook reports now capture Ollama model-call timing and token counts.
+
+The included `evidence/recent_runs/` directory contains the two cancelled run logs/artifacts and the earlier successful focused-run artifact for reproducibility.
+
+
+## Qwen 7B notebook experiment profiles
+
+The manual-only `agent-qwen-coder-7b.yml` workflow now preserves the existing benchmark and adds a selectable `notebook_profile`:
+
+| Profile | Tasks | Repairs | Context | Max output tokens | Batch | Request timeout |
+|---|---:|---:|---:|---:|---:|---:|
+| `small` | 2 introductory tasks | 0 | 1,024 | 384 | 8 | 300s |
+| `medium` | 4 tasks (fundamentals through regression) | 1 | 1,536 | 640 | 16 | 450s |
+| `max` | All 7 tasks | 2 | 2,048 | 900 | 16 | 600s |
+| `custom` | Existing task-set and repair inputs | configurable | configurable | configurable | configurable | configurable |
+
+The `notebook_task_ids`, `notebook_repairs_override`, `notebook_num_ctx`, `notebook_num_predict`, `notebook_num_batch`, `notebook_temperature`, `notebook_top_p`, and `notebook_timeout_override` inputs override the selected preset when non-empty. The existing `notebook_task_set` and `notebook_max_repairs` controls remain available in `custom` mode. The profile resolver validates ranges and writes the resolved configuration to the workflow output.
+
+All existing workflows and model variants remain in place; this is an additive change to the Qwen 7B workflow. The agent's standalone run settings are not changed by the notebook profile. The workflow remains `workflow_dispatch` only.

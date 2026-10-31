@@ -59,7 +59,8 @@ def call_model(model: str, messages: list[dict], timeout: int, base_url: str | N
                 "stream": False,
                 # Small context and batch reduce RAM pressure on CPU-only hosted runners.
                 "options": {
-                    "temperature": 0.1,
+                    "temperature": float(os.environ.get("OLLAMA_TEMPERATURE", "0.1")),
+                    "top_p": float(os.environ.get("OLLAMA_TOP_P", "0.9")),
                     "num_ctx": int(os.environ.get("OLLAMA_NUM_CTX", "2048")),
                     "num_predict": int(os.environ.get("OLLAMA_NUM_PREDICT", "1200")),
                     "num_batch": int(os.environ.get("OLLAMA_NUM_BATCH", "16")),

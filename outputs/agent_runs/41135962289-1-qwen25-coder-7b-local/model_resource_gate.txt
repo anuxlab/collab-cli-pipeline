@@ -1,4 +1,0 @@
-available_ram_gib=14
-free_disk_gib=81
-required_available_ram_gib=7
-status=ready

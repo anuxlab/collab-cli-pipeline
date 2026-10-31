@@ -11,10 +11,10 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from scripts.agent_experiment import call_model, execute_code, extract_code
+    from scripts.agent_experiment import MODEL_CALL_STATS, call_model, execute_code, extract_code
     from scripts.notebook_builder import create_generated_notebook
 except ModuleNotFoundError:
-    from agent_experiment import call_model, execute_code, extract_code
+    from agent_experiment import MODEL_CALL_STATS, call_model, execute_code, extract_code
     from notebook_builder import create_generated_notebook
 
 TASKS: list[dict[str, Any]] = [
@@ -89,16 +89,25 @@ def run_benchmark(model: str, output_dir: Path, ollama_url: str, timeout: int, m
         attempts=[]; final_source=""; final_exec={}; score={}
         for attempt in range(max_repairs+1):
             started=time.monotonic()
+            model_started=time.monotonic()
             try:
-                raw=call_model(model,messages,timeout,ollama_url); source=extract_code(raw)
+                raw=call_model(model,messages,timeout,ollama_url)
+                model_call_seconds=round(time.monotonic()-model_started, 3)
+                model_performance=dict(MODEL_CALL_STATS)
+                source=extract_code(raw)
             except Exception as exc:
-                attempts.append({"attempt":attempt,"stage":"generation","error":f"{type(exc).__name__}: {exc}"}); break
+                attempts.append({"attempt":attempt,"stage":"generation","model_call_seconds":round(time.monotonic()-model_started, 3),
+                                 "error":f"{type(exc).__name__}: {exc}"})
+                break
             script=task_dir/f"attempt_{attempt}.py"; script.write_text(source,encoding="utf-8")
             execution=execute_code(source,task_dir,timeout=min(timeout,180))
             nb_path=task_dir/f"notebook_attempt_{attempt}.ipynb"
             create_generated_notebook(source,nb_path,model=model,status="passed" if execution.get("returncode")==0 else "failed",orchestrator="NotebookBenchmark",execution=execution,task_id=task["id"],task_title=task["title"])
             score=score_task(task,source,execution,nb_path)
-            attempts.append({"attempt":attempt,"duration_seconds":round(time.monotonic()-started,2),"execution":execution,"score":score,"failure_category":score.get("failure_category"),"script":script.name,"notebook":nb_path.name})
+            attempts.append({"attempt":attempt,"duration_seconds":round(time.monotonic()-started,2),
+                             "model_call_seconds":model_call_seconds,"model_performance":model_performance,
+                             "execution":execution,"score":score,"failure_category":score.get("failure_category"),
+                             "script":script.name,"notebook":nb_path.name})
             final_source,final_exec=source,execution
             if execution.get("returncode")==0 and score["task_result_ok"] and score["score"]>=75: break
             if execution.get("infrastructure_error"):

@@ -55,15 +55,74 @@ on:
         type: boolean
         required: true
         default: false
+      notebook_profile:
+        description: "Preset resource/quality profile; overrides below can be used to explore individual settings"
+        type: choice
+        required: true
+        default: "small"
+        options:
+          - "small"
+          - "medium"
+          - "max"
+          - "custom"
+      notebook_task_ids:
+        description: "Optional comma-separated exact task IDs; overrides the profile task selection"
+        type: string
+        required: false
+        default: ""
+      notebook_repairs_override:
+        description: "Optional repair-count override for any profile (0-5; blank uses preset)"
+        type: string
+        required: false
+        default: ""
+      notebook_num_ctx:
+        description: "Override Ollama context window (blank uses profile default: 1024/1536/2048)"
+        type: string
+        required: false
+        default: ""
+      notebook_num_predict:
+        description: "Override maximum generated tokens per model call (blank uses profile default: 384/640/900)"
+        type: string
+        required: false
+        default: ""
+      notebook_num_batch:
+        description: "Override Ollama batch size (blank uses profile default: 8/16/16)"
+        type: string
+        required: false
+        default: ""
+      notebook_temperature:
+        description: "Override sampling temperature (blank uses profile default: 0.1)"
+        type: string
+        required: false
+        default: ""
+      notebook_top_p:
+        description: "Override top_p sampling (blank uses profile default: 0.8/0.85/0.9)"
+        type: string
+        required: false
+        default: ""
+      notebook_timeout_override:
+        description: "Override per-request timeout in seconds (blank uses profile default: 300/450/600)"
+        type: string
+        required: false
+        default: ""
       notebook_task_set:
         description: "Notebook benchmark difficulty range"
         type: choice
         required: true
-        default: "all"
+        default: "simple"
         options:
           - "all"
           - "simple"
           - "complex"
+      notebook_max_repairs:
+        description: "Notebook repair attempts after initial generation (0 is fastest; 1 is recommended)"
+        type: choice
+        required: true
+        default: "1"
+        options:
+          - "0"
+          - "1"
+          - "2"
       enable_dspy_prompt_optimization:
         description: "Run baseline vs DSPy BootstrapFewShot prompt optimization experiment (additional model calls)"
         type: boolean
@@ -89,7 +148,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ai-agent-qwen25-coder-7b-${{ github.run_id }}
+  group: ai-agent-qwen25-coder-7b-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -106,7 +165,7 @@ jobs:
       AGENT_MAX_WEB_SEARCHES_PER_ATTEMPT: "2"
       AGENT_MAX_WEB_SEARCHES_PER_RUN: "8"
       OLLAMA_NUM_CTX: "2048"
-      OLLAMA_NUM_PREDICT: "1200"
+      OLLAMA_NUM_PREDICT: "900"
       OLLAMA_NUM_BATCH: "16"
     steps:
       - name: Checkout repository without persisted credentials
@@ -351,6 +410,37 @@ jobs:
             --interval 2 &
           echo $! > "$RUN_DIR/.memory_monitor_pid"
 
+      - name: Resolve notebook experiment profile and parameter overrides
+        id: notebook_profile
+        if: ${{ success() && inputs.enable_notebook_benchmark && steps.resource_gate.outputs.status == 'ready' && steps.model_check.outputs.available == 'true' }}
+        env:
+          PROFILE: ${{ inputs.notebook_profile }}
+          CUSTOM_TASK_SET: ${{ inputs.notebook_profile == 'custom' && inputs.notebook_task_set || 'simple' }}
+          CUSTOM_REPAIRS: ${{ inputs.notebook_repairs_override != '' && inputs.notebook_repairs_override || (inputs.notebook_profile == 'custom' && inputs.notebook_max_repairs || '') }}
+          CUSTOM_TASK_IDS: ${{ inputs.notebook_task_ids }}
+          CUSTOM_TIMEOUT: ${{ inputs.notebook_timeout_override }}
+          CUSTOM_CTX: ${{ inputs.notebook_num_ctx }}
+          CUSTOM_PREDICT: ${{ inputs.notebook_num_predict }}
+          CUSTOM_BATCH: ${{ inputs.notebook_num_batch }}
+          CUSTOM_TEMPERATURE: ${{ inputs.notebook_temperature }}
+          CUSTOM_TOP_P: ${{ inputs.notebook_top_p }}
+          RUN_DIR: ${{ steps.meta.outputs.run_dir }}/notebook_benchmark
+        shell: bash
+        run: |
+          python scripts/resolve_experiment_profile.py \
+            --profile "$PROFILE" \
+            --task-set "$CUSTOM_TASK_SET" \
+            --task-ids "$CUSTOM_TASK_IDS" \
+            --repairs "$CUSTOM_REPAIRS" \
+            --timeout "$CUSTOM_TIMEOUT" \
+            --num-ctx "$CUSTOM_CTX" \
+            --num-predict "$CUSTOM_PREDICT" \
+            --num-batch "$CUSTOM_BATCH" \
+            --temperature "$CUSTOM_TEMPERATURE" \
+            --top-p "$CUSTOM_TOP_P" \
+            --github-output "$GITHUB_OUTPUT" \
+            --json-output "$RUN_DIR/profile_config.json"
+
       - name: Progressive notebook-generation benchmark
         id: notebook_benchmark
         if: ${{ success() && inputs.enable_notebook_benchmark && steps.resource_gate.outputs.status == 'ready' && steps.model_check.outputs.available == 'true' }}
@@ -359,25 +449,37 @@ jobs:
           MODEL_ID: ${{ env.MODEL_ID }}
           OLLAMA_BASE_URL: http://127.0.0.1:11434
           RUN_DIR: ${{ steps.meta.outputs.run_dir }}/notebook_benchmark
-          MODEL_TIMEOUT: ${{ inputs.model_timeout }}
-          TASK_SET: ${{ inputs.notebook_task_set }}
+          MODEL_TIMEOUT: ${{ steps.notebook_profile.outputs.timeout }}
+          TASK_SET: ${{ steps.notebook_profile.outputs.task_set }}
+          TASK_IDS: ${{ steps.notebook_profile.outputs.task_ids }}
+          OLLAMA_NUM_CTX: ${{ steps.notebook_profile.outputs.num_ctx }}
+          OLLAMA_NUM_PREDICT: ${{ steps.notebook_profile.outputs.num_predict }}
+          OLLAMA_NUM_BATCH: ${{ steps.notebook_profile.outputs.num_batch }}
+          OLLAMA_TEMPERATURE: ${{ steps.notebook_profile.outputs.temperature }}
+          OLLAMA_TOP_P: ${{ steps.notebook_profile.outputs.top_p }}
           NOTEBOOK_SEED: ${{ inputs.notebook_seed }}
           NOTEBOOK_HOLDOUT_ROTATION: ${{ inputs.notebook_holdout_rotation }}
+          NOTEBOOK_MAX_REPAIRS: ${{ steps.notebook_profile.outputs.repairs }}
           ENABLE_DSPY_OPTIMIZATION: ${{ inputs.enable_dspy_prompt_optimization }}
           AGENT_USE_DOCKER: "1"
           AGENT_SANDBOX_IMAGE: collab-agent-sandbox:latest
         shell: bash
         run: |
           OPTIMIZER_ARGS=()
+          TASK_ID_ARGS=()
           if [ "$ENABLE_DSPY_OPTIMIZATION" = "true" ]; then
             OPTIMIZER_ARGS+=(--dspy-optimize)
+          fi
+          if [ -n "$TASK_IDS" ]; then
+            TASK_ID_ARGS+=(--task-ids "$TASK_IDS")
           fi
           python scripts/notebook_benchmark.py \
             --model "$MODEL_ID" \
             --output-dir "$RUN_DIR" \
             --timeout "$MODEL_TIMEOUT" \
-            --max-repairs 2 \
+            --max-repairs "$NOTEBOOK_MAX_REPAIRS" \
             --task-set "$TASK_SET" \
+            "${TASK_ID_ARGS[@]}" \
             --phase all \
             --seed "$NOTEBOOK_SEED" \
             --holdout-rotation "$NOTEBOOK_HOLDOUT_ROTATION" \
