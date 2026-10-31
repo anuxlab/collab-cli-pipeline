@@ -1,0 +1,10 @@
+{
+  "workflow": "Local AI Agent Experiment \u2014 DeepSeek-Coder-V2-Lite 16B Q4_0 (Ollama)",
+  "run_id": "41135885167",
+  "run_attempt": "1",
+  "commit_sha": "e31e1a02043f06caee0b7d0257a4226765894586",
+  "ref": "refs/heads/main",
+  "model": "deepseek-coder-v2:16b-lite-instruct-q4_0",
+  "python": "3.11.17",
+  "started_at_utc": "2026-10-30T22:06:55.522919+00:00"
+}

@@ -1,0 +1,293 @@
+{
+  "task": {
+    "id": "05_time_series",
+    "level": "5-specialized",
+    "title": "Time-series forecasting without temporal leakage",
+    "rubric": [
+      "date_range",
+      "shift",
+      "rolling",
+      "train",
+      "test",
+      "naive",
+      "forecast"
+    ],
+    "prompt": "Build a reproducible synthetic daily time-series forecasting notebook (at least 180 observations) with trend, weekly seasonality and noise. Use chronological train/test split (never random shuffle), create lag and rolling features without future leakage, compare a naive/seasonal-naive baseline with a model such as LinearRegression, and report MAE/RMSE. Plot series, forecast vs actual and residuals. Explain leakage prevention and limitations. Assert train dates precede test dates and metrics are finite. Print BENCHMARK_RESULT=<JSON> with task_id, train_samples, test_samples, baseline_mae, model_mae, model_rmse."
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "duration_seconds": 101.31,
+      "execution": {
+        "returncode": 127,
+        "stdout": "",
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135885167-1-deepseek-coder-v2-lite-16b-q4-0-local/notebook_benchmark/baseline/05_time_series/agent-container-4c3b601ac0c24ea0803af3327e07e316.cid: no such file or directory\n\nRun 'docker run --help' for more information\n",
+        "duration_seconds": 0.024,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": null
+      },
+      "score": {
+        "task_id": "05_time_series",
+        "level": "5-specialized",
+        "title": "Time-series forecasting without temporal leakage",
+        "score": 42.86,
+        "components": {
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 17.86,
+          "notebook_structure": 10,
+          "source_reconstruction": 5,
+          "section_diversity": 10
+        },
+        "rubric_hits": [
+          "shift",
+          "rolling",
+          "train",
+          "test",
+          "forecast"
+        ],
+        "rubric_missing": [
+          "date_range",
+          "naive"
+        ],
+        "execution_ok": false,
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 28,
+        "markdown_cells": 29,
+        "section_headings": [
+          "Environment and imports",
+          "Experiment execution",
+          "Data inspection and exploratory analysis",
+          "Experiment configuration",
+          "Data inspection and exploratory analysis",
+          "Experiment configuration",
+          "Temporal feature engineering",
+          "Experiment configuration",
+          "Data inspection and exploratory analysis",
+          "Temporal feature engineering",
+          "Experiment configuration",
+          "Temporal feature engineering",
+          "Experiment configuration",
+          "Model training",
+          "Prediction and inference",
+          "Evaluation and metrics",
+          "Visualization",
+          "Experiment execution",
+          "Forecasting and temporal baselines",
+          "Experiment execution",
+          "Visualization",
+          "Diagnostics and error analysis",
+          "Experiment execution",
+          "Diagnostics and error analysis",
+          "Experiment execution",
+          "Visualization",
+          "Forecasting and temporal baselines",
+          "Experiment execution"
+        ],
+        "returncode": 127,
+        "timed_out": false,
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135885167-1-deepseek-coder-v2-lite-16b-q4-0-local/notebook_benchmark/baseline/05_time_series/agent-container-4c3b601ac0c24ea0803af3327e07e316.cid: no such file or directory\n\nRun 'docker run --help' for more information\n"
+      },
+      "script": "attempt_0.py",
+      "notebook": "notebook_attempt_0.ipynb"
+    },
+    {
+      "attempt": 1,
+      "duration_seconds": 168.91,
+      "execution": {
+        "returncode": 127,
+        "stdout": "",
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135885167-1-deepseek-coder-v2-lite-16b-q4-0-local/notebook_benchmark/baseline/05_time_series/agent-container-dc905d038d3a4f2cbedca64f795cd3f8.cid: no such file or directory\n\nRun 'docker run --help' for more information\n",
+        "duration_seconds": 0.016,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": null
+      },
+      "score": {
+        "task_id": "05_time_series",
+        "level": "5-specialized",
+        "title": "Time-series forecasting without temporal leakage",
+        "score": 27.86,
+        "components": {
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 17.86,
+          "notebook_structure": 3,
+          "source_reconstruction": 5,
+          "section_diversity": 2
+        },
+        "rubric_hits": [
+          "shift",
+          "rolling",
+          "train",
+          "test",
+          "forecast"
+        ],
+        "rubric_missing": [
+          "date_range",
+          "naive"
+        ],
+        "execution_ok": false,
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 1,
+        "markdown_cells": 2,
+        "section_headings": [
+          "Generated code \u2014 syntax validation failed"
+        ],
+        "returncode": 127,
+        "timed_out": false,
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135885167-1-deepseek-coder-v2-lite-16b-q4-0-local/notebook_benchmark/baseline/05_time_series/agent-container-dc905d038d3a4f2cbedca64f795cd3f8.cid: no such file or directory\n\nRun 'docker run --help' for more information\n"
+      },
+      "script": "attempt_1.py",
+      "notebook": "notebook_attempt_1.ipynb"
+    },
+    {
+      "attempt": 2,
+      "duration_seconds": 170.06,
+      "execution": {
+        "returncode": 127,
+        "stdout": "",
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135885167-1-deepseek-coder-v2-lite-16b-q4-0-local/notebook_benchmark/baseline/05_time_series/agent-container-6f32af4abadd43f78f61c7bfb33ec53d.cid: no such file or directory\n\nRun 'docker run --help' for more information\n",
+        "duration_seconds": 0.029,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": null
+      },
+      "score": {
+        "task_id": "05_time_series",
+        "level": "5-specialized",
+        "title": "Time-series forecasting without temporal leakage",
+        "score": 39.29,
+        "components": {
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 14.29,
+          "notebook_structure": 10,
+          "source_reconstruction": 5,
+          "section_diversity": 10
+        },
+        "rubric_hits": [
+          "shift",
+          "train",
+          "test",
+          "forecast"
+        ],
+        "rubric_missing": [
+          "date_range",
+          "rolling",
+          "naive"
+        ],
+        "execution_ok": false,
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 27,
+        "markdown_cells": 28,
+        "section_headings": [
+          "Environment and imports",
+          "Experiment execution",
+          "Data inspection and exploratory analysis",
+          "Experiment configuration",
+          "Data inspection and exploratory analysis",
+          "Experiment configuration",
+          "Temporal feature engineering",
+          "Experiment configuration",
+          "Data inspection and exploratory analysis",
+          "Temporal feature engineering",
+          "Experiment configuration",
+          "Temporal feature engineering",
+          "Experiment configuration",
+          "Model training",
+          "Prediction and inference",
+          "Evaluation and metrics",
+          "Visualization",
+          "Experiment execution",
+          "Forecasting and temporal baselines",
+          "Experiment execution",
+          "Visualization",
+          "Diagnostics and error analysis",
+          "Experiment execution",
+          "Diagnostics and error analysis",
+          "Experiment execution",
+          "Visualization",
+          "Experiment execution"
+        ],
+        "returncode": 127,
+        "timed_out": false,
+        "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135885167-1-deepseek-coder-v2-lite-16b-q4-0-local/notebook_benchmark/baseline/05_time_series/agent-container-6f32af4abadd43f78f61c7bfb33ec53d.cid: no such file or directory\n\nRun 'docker run --help' for more information\n"
+      },
+      "script": "attempt_2.py",
+      "notebook": "notebook_attempt_2.ipynb"
+    }
+  ],
+  "final_score": {
+    "task_id": "05_time_series",
+    "level": "5-specialized",
+    "title": "Time-series forecasting without temporal leakage",
+    "score": 39.29,
+    "components": {
+      "execution": 0,
+      "structured_result": 0,
+      "rubric_coverage": 14.29,
+      "notebook_structure": 10,
+      "source_reconstruction": 5,
+      "section_diversity": 10
+    },
+    "rubric_hits": [
+      "shift",
+      "train",
+      "test",
+      "forecast"
+    ],
+    "rubric_missing": [
+      "date_range",
+      "rolling",
+      "naive"
+    ],
+    "execution_ok": false,
+    "task_result_ok": false,
+    "source_reconstruction_ok": true,
+    "result": null,
+    "code_cells": 27,
+    "markdown_cells": 28,
+    "section_headings": [
+      "Environment and imports",
+      "Experiment execution",
+      "Data inspection and exploratory analysis",
+      "Experiment configuration",
+      "Data inspection and exploratory analysis",
+      "Experiment configuration",
+      "Temporal feature engineering",
+      "Experiment configuration",
+      "Data inspection and exploratory analysis",
+      "Temporal feature engineering",
+      "Experiment configuration",
+      "Temporal feature engineering",
+      "Experiment configuration",
+      "Model training",
+      "Prediction and inference",
+      "Evaluation and metrics",
+      "Visualization",
+      "Experiment execution",
+      "Forecasting and temporal baselines",
+      "Experiment execution",
+      "Visualization",
+      "Diagnostics and error analysis",
+      "Experiment execution",
+      "Diagnostics and error analysis",
+      "Experiment execution",
+      "Visualization",
+      "Experiment execution"
+    ],
+    "returncode": 127,
+    "timed_out": false,
+    "stderr": "docker: failed to create the container ID file: open outputs/agent_runs/41135885167-1-deepseek-coder-v2-lite-16b-q4-0-local/notebook_benchmark/baseline/05_time_series/agent-container-6f32af4abadd43f78f61c7bfb33ec53d.cid: no such file or directory\n\nRun 'docker run --help' for more information\n"
+  },
+  "final_status": "failed",
+  "final_notebook": "outputs/agent_runs/41135885167-1-deepseek-coder-v2-lite-16b-q4-0-local/notebook_benchmark/baseline/05_time_series/notebook.ipynb"
+}

@@ -1,0 +1,58 @@
+{
+  "status": "success",
+  "optimizer": "DSPy BootstrapFewShot",
+  "model": "deepseek-coder-v2:16b-lite-instruct-q4_0",
+  "training_tasks": [
+    "01_python_fundamentals",
+    "02_data_quality_eda",
+    "03_classification",
+    "04_regression_diagnostics"
+  ],
+  "target_tasks": [
+    "01_python_fundamentals",
+    "02_data_quality_eda",
+    "03_classification",
+    "04_regression_diagnostics",
+    "05_time_series",
+    "06_nlp_text_classification",
+    "07_combinatorial_optimization"
+  ],
+  "guidance": {
+    "01_python_fundamentals": {
+      "design_strategy": "]\nBuild a workflow specific to descriptive statistics calculation; organize around mean, median, variance, assert.",
+      "validation_plan": "Assert and report evidence for mean, median, variance, assert; validate data assumptions and numerical outputs.",
+      "differentiation": "Use the task's distinctive methods and diagnostics: mean, median, variance, assert, not a generic classification workflow."
+    },
+    "02_data_quality_eda": {
+      "design_strategy": "]\nBuild a workflow specific to Data Audit and Visualization; organize around isna, duplicated, groupby, describe, matplotlib.",
+      "validation_plan": "Assert and report evidence for isna, duplicated, groupby, describe, matplotlib; validate data assumptions and numerical outputs.",
+      "differentiation": "Use the task's distinctive methods and diagnostics: isna, duplicated, groupby, describe, matplotlib, not a generic classification workflow."
+    },
+    "03_classification": {
+      "design_strategy": "]\nBuild a workflow specific to Leakage-aware classification experiment; organize around train_test_split, Pipeline, StandardScaler, LogisticRegression, classification_report, confusion_matrix.",
+      "validation_plan": "Assert and report evidence for train_test_split, Pipeline, StandardScaler, LogisticRegression, classification_report, confusion_matrix; validate data assumptions and numerical outputs.",
+      "differentiation": "Use the task's distinctive methods and diagnostics: train_test_split, Pipeline, StandardScaler, LogisticRegression, classification_report, confusion_matrix, not a generic classification workflow."
+    },
+    "04_regression_diagnostics": {
+      "design_strategy": "]\nBuild a workflow specific to Regression with residual diagnostics; organize around load_diabetes, train_test_split, RandomForestRegressor, mean_squared_error, residual, cross_val_score.",
+      "validation_plan": "Assert and report evidence for load_diabetes, train_test_split, RandomForestRegressor, mean_squared_error, residual, cross_val_score; validate data assumptions and numerical outputs.",
+      "differentiation": "Use the task's distinctive methods and diagnostics: load_diabetes, train_test_split, RandomForestRegressor, mean_squared_error, residual, cross_val_score, not a generic classification workflow."
+    },
+    "05_time_series": {
+      "design_strategy": "]\nBuild a workflow specific to Time-Series Forecasting with feature engineering and baseline comparison; organize around date_range, shift, rolling, train, test, naive, forecast.",
+      "validation_plan": "Assert and report evidence for date_range, shift, rolling, train, test, naive, forecast; validate data assumptions and numerical outputs.",
+      "differentiation": "Use the task's distinctive methods and diagnostics: date_range, shift, rolling, train, test, naive, forecast, not a generic classification workflow."
+    },
+    "06_nlp_text_classification": {
+      "design_strategy": "]\nBuild a workflow specific to NLP Sentiment Classification with a focus on synthetic data handling; organize around TfidfVectorizer, Pipeline, LogisticRegression, precision, recall, misclassified.",
+      "validation_plan": "Assert and report evidence for TfidfVectorizer, Pipeline, LogisticRegression, precision, recall, misclassified; validate data assumptions and numerical outputs.",
+      "differentiation": "Use the task's distinctive methods and diagnostics: TfidfVectorizer, Pipeline, LogisticRegression, precision, recall, misclassified, not a generic classification workflow."
+    },
+    "07_combinatorial_optimization": {
+      "design_strategy": "]\nBuild a workflow specific to optimization and comparison of heuristic vs exact methods; organize around capacity, enumerate, itertools, greedy, optimal, assert.",
+      "validation_plan": "Assert and report evidence for capacity, enumerate, itertools, greedy, optimal, assert; validate data assumptions and numerical outputs.",
+      "differentiation": "Use the task's distinctive methods and diagnostics: capacity, enumerate, itertools, greedy, optimal, assert, not a generic classification workflow."
+    }
+  },
+  "caveat": "This is a rubric-guided prompt optimization trial, not proof of improved quality. Evaluate on held-out tasks and compare baseline vs optimized runs."
+}
