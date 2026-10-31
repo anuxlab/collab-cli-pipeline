@@ -1,0 +1,33 @@
+               total        used        free      shared  buff/cache   available
+Mem:     16760344576  1158807552 14117560320    48168960  1853132800 15601537024
+Swap:     3221221376           0  3221221376
+---
+Filesystem        1B-blocks        Used   Available Use% Mounted on
+/dev/root      154894188544 63713161216 91164250112  42% /
+---
+MemTotal:       16367524 kB
+MemFree:        13786680 kB
+MemAvailable:   15235876 kB
+Buffers:           81872 kB
+Cached:          1641052 kB
+SwapCached:            0 kB
+Active:           818152 kB
+Inactive:        1162808 kB
+Active(anon):     313820 kB
+Inactive(anon):        0 kB
+Active(file):     504332 kB
+Inactive(file):  1162808 kB
+Unevictable:       46728 kB
+Mlocked:           43656 kB
+SwapTotal:       3145724 kB
+SwapFree:        3145724 kB
+Zswap:                 0 kB
+Zswapped:              0 kB
+Dirty:            360776 kB
+Writeback:             0 kB
+AnonPages:        304824 kB
+Mapped:           332172 kB
+Shmem:             47040 kB
+KReclaimable:      86776 kB
+Slab:             165976 kB
+

@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "generated_at_utc": "2026-10-31T06:18:27.204021+00:00",
+  "identity": {
+    "repository": "anuxlab/collab-cli-pipeline",
+    "workflow": "Local AI Agent Experiment — Qwen2.5-Coder 7B (Ollama)",
+    "run_id": "41176029090",
+    "run_attempt": "1",
+    "commit_sha": "f3982324cc5a3a19a6fdf7e5f3c2217093f79313",
+    "ref": "refs/heads/main",
+    "runner_os": "Linux",
+    "runner_arch": "X64"
+  },
+  "model": {
+    "requested": "qwen2.5-coder:7b-instruct-q4_K_M",
+    "backend": "local Ollama",
+    "quantization": "quantized Ollama model",
+    "context_tokens": "2048",
+    "generation_tokens": "900",
+    "batch_size": "16"
+  },
+  "status": "skipped",
+  "failure_classification": {
+    "code": "SANDBOX_IMAGE_MISSING",
+    "explanation": "The sandbox image was not built or was unavailable. Check the test and Docker-build steps; do not spend model repair attempts on this infrastructure error."
+  },
+  "stage_status": {
+    "ollama_setup": "not_run",
+    "model_pull": "not_run",
+    "agent_step": "skipped"
+  },
+  "runner_resources": {
+    "cpu_count": 4,
+    "memory_kib": {
+      "MemTotal": 16367524,
+      "MemAvailable": 15172684,
+      "SwapTotal": 3145724,
+      "SwapFree": 3145724
+    },
+    "workspace_disk_bytes": {
+      "total": 154894188544,
+      "used": 63292944384,
+      "free": 91584466944
+    },
+    "gpu": {
+      "available": false,
+      "details": "No NVIDIA GPU detected; standard hosted runner uses CPU inference."
+    },
+    "runner_name": "GitHub Actions 1000001634",
+    "runner_os": "Linux",
+    "runner_arch": "X64"
+  },
+  "agent_summary": {},
+  "attempts": [],
+  "ollama_model_list": {
+    "error": "ollama binary unavailable"
+  },
+  "log_inventory": [
+    {
+      "file": "docker-cleanup.log",
+      "bytes": 97,
+      "lines": 2
+    },
+    {
+      "file": "ollama-stop.log",
+      "bytes": 99,
+      "lines": 1
+    },
+    {
+      "file": "ollama-systemd.log",
+      "bytes": 17,
+      "lines": 1
+    },
+    {
+      "file": "docker-images.txt",
+      "bytes": 632,
+      "lines": 7
+    },
+    {
+      "file": "final-disk.txt",
+      "bytes": 89,
+      "lines": 2
+    },
+    {
+      "file": "final-free-memory.txt",
+      "bytes": 207,
+      "lines": 3
+    },
+    {
+      "file": "model_pull_status.txt",
+      "bytes": 15,
+      "lines": 1
+    },
+    {
+      "file": "ollama-ps.txt",
+      "bytes": 100,
+      "lines": 1
+    },
+    {
+      "file": "ollama_setup_status.txt",
+      "bytes": 15,
+      "lines": 1
+    }
+  ],
+  "recommended_next_action": "The sandbox image was not built or was unavailable. Check the test and Docker-build steps; do not spend model repair attempts on this infrastructure error."
+}
