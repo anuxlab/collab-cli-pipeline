@@ -1,0 +1,8 @@
+{
+  "peak_model_runner_rss_kib": 0,
+  "peak_model_runner_rss_mib": 0.0,
+  "peak_cgroup_memory_bytes": null,
+  "peak_cgroup_memory_mib": null,
+  "sample_count": 2190,
+  "measurement_note": "Runner RSS aggregates processes whose cmdline includes both ollama and runner; cgroup is the whole job/container limit, not model-only."
+}

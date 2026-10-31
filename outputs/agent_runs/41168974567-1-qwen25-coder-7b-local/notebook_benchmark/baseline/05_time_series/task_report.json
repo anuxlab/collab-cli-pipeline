@@ -1,0 +1,250 @@
+{
+  "task": {
+    "id": "05_time_series",
+    "level": "5-specialized",
+    "title": "Time-series forecasting without temporal leakage",
+    "rubric": [
+      "date_range",
+      "shift",
+      "rolling",
+      "train",
+      "test",
+      "naive",
+      "forecast"
+    ],
+    "prompt": "Build a reproducible synthetic daily time-series forecasting notebook (at least 180 observations) with trend, weekly seasonality and noise. Use chronological train/test split (never random shuffle), create lag and rolling features without future leakage, compare a naive/seasonal-naive baseline with a model such as LinearRegression, and report MAE/RMSE. Plot series, forecast vs actual and residuals. Explain leakage prevention and limitations. Assert train dates precede test dates and metrics are finite. Print BENCHMARK_RESULT=<JSON> with task_id, train_samples, test_samples, baseline_mae, model_mae, model_rmse."
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "duration_seconds": 262.4,
+      "execution": {
+        "returncode": 0,
+        "stdout": "{\"task_id\": \"time_series_forecasting\", \"train_samples\": 144, \"test_samples\": 26, \"baseline_mae\": 11.90630338805817, \"model_mae\": 1.0056912567681418e-13, \"model_rmse\": 1.2904640666222267e-13}\n",
+        "stderr": "mkdir -p failed for path /.config/matplotlib: [Errno 30] Read-only file system: '/.config'\nMatplotlib created a temporary cache directory at /tmp/matplotlib-wycmbosl because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:32: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df['value_roll_mean'] = df['value'].rolling(window=window).mean()\n/workspace/generated_solution.py:33: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df['value_roll_std'] = df['value'].rolling(window=window).std()\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:32: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df['value_roll_mean'] = df['value'].rolling(window=window).mean()\n/workspace/generated_solution.py:33: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df['value_roll_std'] = df['value'].rolling(window=window).std()\n/workspace/generated_solution.py:40: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  train_df.dropna(inplace=True)\n/workspace/generated_solution.py:41: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  test_df.dropna(inplace=True)\n",
+        "duration_seconds": 2.436,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": "faef636a30be4468bfe99905f494afdff1d11f487591c0126101683292db5793",
+        "infrastructure_error": false
+      },
+      "score": {
+        "task_id": "05_time_series",
+        "level": "5-specialized",
+        "title": "Time-series forecasting without temporal leakage",
+        "score": 78.0,
+        "components": {
+          "syntax_validity": 10,
+          "execution": 25,
+          "structured_result": 0,
+          "rubric_coverage": 20.0,
+          "notebook_structure": 10,
+          "source_reconstruction": 5,
+          "section_diversity": 8
+        },
+        "rubric_hits": [
+          "date_range",
+          "shift",
+          "rolling",
+          "train",
+          "test",
+          "naive",
+          "forecast"
+        ],
+        "rubric_missing": [],
+        "execution_ok": true,
+        "syntax_valid": true,
+        "infrastructure_error": false,
+        "failure_category": "quality",
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 6,
+        "markdown_cells": 7,
+        "section_headings": [
+          "Environment and imports",
+          "Forecasting and temporal baselines",
+          "Temporal feature engineering",
+          "Forecasting and temporal baselines",
+          "Reusable definitions",
+          "Forecasting and temporal baselines"
+        ],
+        "returncode": 0,
+        "timed_out": false,
+        "stderr": "ocs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:31: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df[f'value_lag_{lag}'] = df['value'].shift(lag)\n/workspace/generated_solution.py:32: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df['value_roll_mean'] = df['value'].rolling(window=window).mean()\n/workspace/generated_solution.py:33: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame.\nTry using .loc[row_indexer,col_indexer] = value instead\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  df['value_roll_std'] = df['value'].rolling(window=window).std()\n/workspace/generated_solution.py:40: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  train_df.dropna(inplace=True)\n/workspace/generated_solution.py:41: SettingWithCopyWarning: \nA value is trying to be set on a copy of a slice from a DataFrame\n\nSee the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy\n  test_df.dropna(inplace=True)\n"
+      },
+      "failure_category": "quality",
+      "script": "attempt_0.py",
+      "notebook": "notebook_attempt_0.ipynb"
+    },
+    {
+      "attempt": 1,
+      "duration_seconds": 244.29,
+      "execution": {
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 4, in <module>\n    from statsmodels.tsa.arima.model import ARIMA\nModuleNotFoundError: No module named 'statsmodels'\n",
+        "duration_seconds": 1.753,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": "eed7891a66eb68fecf85dd250c64024971a14b2feb62bea36f17ecb14d004dc2",
+        "infrastructure_error": false
+      },
+      "score": {
+        "task_id": "05_time_series",
+        "level": "5-specialized",
+        "title": "Time-series forecasting without temporal leakage",
+        "score": 40.29,
+        "components": {
+          "syntax_validity": 10,
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 14.29,
+          "notebook_structure": 10,
+          "source_reconstruction": 0,
+          "section_diversity": 6
+        },
+        "rubric_hits": [
+          "shift",
+          "rolling",
+          "train",
+          "test",
+          "forecast"
+        ],
+        "rubric_missing": [
+          "date_range",
+          "naive"
+        ],
+        "execution_ok": false,
+        "syntax_valid": true,
+        "infrastructure_error": false,
+        "failure_category": "execution",
+        "task_result_ok": false,
+        "source_reconstruction_ok": false,
+        "result": null,
+        "code_cells": 4,
+        "markdown_cells": 5,
+        "section_headings": [
+          "Environment and imports",
+          "Forecasting and temporal baselines",
+          "Temporal feature engineering",
+          "Forecasting and temporal baselines"
+        ],
+        "returncode": 1,
+        "timed_out": false,
+        "stderr": "Traceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 4, in <module>\n    from statsmodels.tsa.arima.model import ARIMA\nModuleNotFoundError: No module named 'statsmodels'\n"
+      },
+      "failure_category": "execution",
+      "script": "attempt_1.py",
+      "notebook": "notebook_attempt_1.ipynb"
+    },
+    {
+      "attempt": 2,
+      "duration_seconds": 152.48,
+      "execution": {
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "Traceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 4, in <module>\n    from statsmodels.tsa.arima.model import ARIMA\nModuleNotFoundError: No module named 'statsmodels'\n",
+        "duration_seconds": 1.647,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": "d1ae110cd8f4c5cfafcedee4cbabbcb773596a884fc0799a3b8425ac52a1ed55",
+        "infrastructure_error": false
+      },
+      "score": {
+        "task_id": "05_time_series",
+        "level": "5-specialized",
+        "title": "Time-series forecasting without temporal leakage",
+        "score": 40.29,
+        "components": {
+          "syntax_validity": 10,
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 14.29,
+          "notebook_structure": 10,
+          "source_reconstruction": 0,
+          "section_diversity": 6
+        },
+        "rubric_hits": [
+          "shift",
+          "rolling",
+          "train",
+          "test",
+          "forecast"
+        ],
+        "rubric_missing": [
+          "date_range",
+          "naive"
+        ],
+        "execution_ok": false,
+        "syntax_valid": true,
+        "infrastructure_error": false,
+        "failure_category": "execution",
+        "task_result_ok": false,
+        "source_reconstruction_ok": false,
+        "result": null,
+        "code_cells": 4,
+        "markdown_cells": 5,
+        "section_headings": [
+          "Environment and imports",
+          "Forecasting and temporal baselines",
+          "Temporal feature engineering",
+          "Forecasting and temporal baselines"
+        ],
+        "returncode": 1,
+        "timed_out": false,
+        "stderr": "Traceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 4, in <module>\n    from statsmodels.tsa.arima.model import ARIMA\nModuleNotFoundError: No module named 'statsmodels'\n"
+      },
+      "failure_category": "execution",
+      "script": "attempt_2.py",
+      "notebook": "notebook_attempt_2.ipynb"
+    }
+  ],
+  "final_score": {
+    "task_id": "05_time_series",
+    "level": "5-specialized",
+    "title": "Time-series forecasting without temporal leakage",
+    "score": 40.29,
+    "components": {
+      "syntax_validity": 10,
+      "execution": 0,
+      "structured_result": 0,
+      "rubric_coverage": 14.29,
+      "notebook_structure": 10,
+      "source_reconstruction": 0,
+      "section_diversity": 6
+    },
+    "rubric_hits": [
+      "shift",
+      "rolling",
+      "train",
+      "test",
+      "forecast"
+    ],
+    "rubric_missing": [
+      "date_range",
+      "naive"
+    ],
+    "execution_ok": false,
+    "syntax_valid": true,
+    "infrastructure_error": false,
+    "failure_category": "execution",
+    "task_result_ok": false,
+    "source_reconstruction_ok": false,
+    "result": null,
+    "code_cells": 4,
+    "markdown_cells": 5,
+    "section_headings": [
+      "Environment and imports",
+      "Forecasting and temporal baselines",
+      "Temporal feature engineering",
+      "Forecasting and temporal baselines"
+    ],
+    "returncode": 1,
+    "timed_out": false,
+    "stderr": "Traceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 4, in <module>\n    from statsmodels.tsa.arima.model import ARIMA\nModuleNotFoundError: No module named 'statsmodels'\n"
+  },
+  "final_status": "failed",
+  "failure_category": "execution",
+  "final_notebook": "/home/runner/work/collab-cli-pipeline/collab-cli-pipeline/outputs/agent_runs/41168974567-1-qwen25-coder-7b-local/notebook_benchmark/baseline/05_time_series/notebook.ipynb"
+}
