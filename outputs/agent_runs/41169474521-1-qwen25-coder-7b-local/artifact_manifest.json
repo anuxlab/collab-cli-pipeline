@@ -1,0 +1,350 @@
+{
+  "generated_at_utc": "2026-10-31T05:48:48.172546+00:00",
+  "file_count": 86,
+  "files": [
+    {
+      "path": "analysis.json",
+      "bytes": 3468
+    },
+    {
+      "path": "analysis_report.md",
+      "bytes": 10820
+    },
+    {
+      "path": "docker-cleanup.log",
+      "bytes": 145
+    },
+    {
+      "path": "docker-images.txt",
+      "bytes": 770
+    },
+    {
+      "path": "final-disk.txt",
+      "bytes": 89
+    },
+    {
+      "path": "final-free-memory.txt",
+      "bytes": 207
+    },
+    {
+      "path": "final_system_snapshot.txt",
+      "bytes": 1043
+    },
+    {
+      "path": "model_check.log",
+      "bytes": 522
+    },
+    {
+      "path": "model_check_status.txt",
+      "bytes": 15
+    },
+    {
+      "path": "model_pull.log",
+      "bytes": 33048
+    },
+    {
+      "path": "model_pull_status.txt",
+      "bytes": 27
+    },
+    {
+      "path": "model_resource_gate.txt",
+      "bytes": 80
+    },
+    {
+      "path": "notebook_benchmark/baseline/01_python_fundamentals/attempt_0.py",
+      "bytes": 1064
+    },
+    {
+      "path": "notebook_benchmark/baseline/01_python_fundamentals/attempt_1.py",
+      "bytes": 1064
+    },
+    {
+      "path": "notebook_benchmark/baseline/01_python_fundamentals/attempt_2.py",
+      "bytes": 1064
+    },
+    {
+      "path": "notebook_benchmark/baseline/01_python_fundamentals/generated_solution.py",
+      "bytes": 1064
+    },
+    {
+      "path": "notebook_benchmark/baseline/01_python_fundamentals/notebook.ipynb",
+      "bytes": 6225
+    },
+    {
+      "path": "notebook_benchmark/baseline/01_python_fundamentals/notebook_attempt_0.ipynb",
+      "bytes": 6589
+    },
+    {
+      "path": "notebook_benchmark/baseline/01_python_fundamentals/notebook_attempt_1.ipynb",
+      "bytes": 6225
+    },
+    {
+      "path": "notebook_benchmark/baseline/01_python_fundamentals/notebook_attempt_2.ipynb",
+      "bytes": 6225
+    },
+    {
+      "path": "notebook_benchmark/baseline/01_python_fundamentals/task_report.json",
+      "bytes": 8157
+    },
+    {
+      "path": "notebook_benchmark/baseline/02_data_quality_eda/attempt_0.py",
+      "bytes": 2491
+    },
+    {
+      "path": "notebook_benchmark/baseline/02_data_quality_eda/attempt_1.py",
+      "bytes": 2489
+    },
+    {
+      "path": "notebook_benchmark/baseline/02_data_quality_eda/attempt_2.py",
+      "bytes": 2480
+    },
+    {
+      "path": "notebook_benchmark/baseline/02_data_quality_eda/generated_solution.py",
+      "bytes": 2480
+    },
+    {
+      "path": "notebook_benchmark/baseline/02_data_quality_eda/notebook.ipynb",
+      "bytes": 14099
+    },
+    {
+      "path": "notebook_benchmark/baseline/02_data_quality_eda/notebook_attempt_0.ipynb",
+      "bytes": 14110
+    },
+    {
+      "path": "notebook_benchmark/baseline/02_data_quality_eda/notebook_attempt_1.ipynb",
+      "bytes": 14108
+    },
+    {
+      "path": "notebook_benchmark/baseline/02_data_quality_eda/notebook_attempt_2.ipynb",
+      "bytes": 14099
+    },
+    {
+      "path": "notebook_benchmark/baseline/02_data_quality_eda/task_report.json",
+      "bytes": 14838
+    },
+    {
+      "path": "notebook_benchmark/baseline/03_classification/attempt_0.py",
+      "bytes": 2963
+    },
+    {
+      "path": "notebook_benchmark/baseline/03_classification/attempt_1.py",
+      "bytes": 3138
+    },
+    {
+      "path": "notebook_benchmark/baseline/03_classification/attempt_2.py",
+      "bytes": 2967
+    },
+    {
+      "path": "notebook_benchmark/baseline/03_classification/generated_solution.py",
+      "bytes": 2967
+    },
+    {
+      "path": "notebook_benchmark/baseline/03_classification/notebook.ipynb",
+      "bytes": 17554
+    },
+    {
+      "path": "notebook_benchmark/baseline/03_classification/notebook_attempt_0.ipynb",
+      "bytes": 17559
+    },
+    {
+      "path": "notebook_benchmark/baseline/03_classification/notebook_attempt_1.ipynb",
+      "bytes": 19023
+    },
+    {
+      "path": "notebook_benchmark/baseline/03_classification/notebook_attempt_2.ipynb",
+      "bytes": 17554
+    },
+    {
+      "path": "notebook_benchmark/baseline/03_classification/task_report.json",
+      "bytes": 14405
+    },
+    {
+      "path": "notebook_benchmark/baseline/04_regression_diagnostics/attempt_0.py",
+      "bytes": 2600
+    },
+    {
+      "path": "notebook_benchmark/baseline/04_regression_diagnostics/attempt_1.py",
+      "bytes": 2570
+    },
+    {
+      "path": "notebook_benchmark/baseline/04_regression_diagnostics/attempt_2.py",
+      "bytes": 2766
+    },
+    {
+      "path": "notebook_benchmark/baseline/04_regression_diagnostics/generated_solution.py",
+      "bytes": 2766
+    },
+    {
+      "path": "notebook_benchmark/baseline/04_regression_diagnostics/notebook.ipynb",
+      "bytes": 15169
+    },
+    {
+      "path": "notebook_benchmark/baseline/04_regression_diagnostics/notebook_attempt_0.ipynb",
+      "bytes": 14668
+    },
+    {
+      "path": "notebook_benchmark/baseline/04_regression_diagnostics/notebook_attempt_1.ipynb",
+      "bytes": 15077
+    },
+    {
+      "path": "notebook_benchmark/baseline/04_regression_diagnostics/notebook_attempt_2.ipynb",
+      "bytes": 15169
+    },
+    {
+      "path": "notebook_benchmark/baseline/04_regression_diagnostics/task_report.json",
+      "bytes": 14687
+    },
+    {
+      "path": "notebook_benchmark/baseline/05_time_series/attempt_0.py",
+      "bytes": 3317
+    },
+    {
+      "path": "notebook_benchmark/baseline/05_time_series/attempt_1.py",
+      "bytes": 1013
+    },
+    {
+      "path": "notebook_benchmark/baseline/05_time_series/attempt_2.py",
+      "bytes": 1151
+    },
+    {
+      "path": "notebook_benchmark/baseline/05_time_series/generated_solution.py",
+      "bytes": 1151
+    },
+    {
+      "path": "notebook_benchmark/baseline/05_time_series/notebook.ipynb",
+      "bytes": 9571
+    },
+    {
+      "path": "notebook_benchmark/baseline/05_time_series/notebook_attempt_0.ipynb",
+      "bytes": 25963
+    },
+    {
+      "path": "notebook_benchmark/baseline/05_time_series/notebook_attempt_1.ipynb",
+      "bytes": 10546
+    },
+    {
+      "path": "notebook_benchmark/baseline/05_time_series/notebook_attempt_2.ipynb",
+      "bytes": 9571
+    },
+    {
+      "path": "notebook_benchmark/baseline/05_time_series/task_report.json",
+      "bytes": 26647
+    },
+    {
+      "path": "notebook_benchmark/baseline/06_nlp_text_classification/attempt_0.py",
+      "bytes": 2433
+    },
+    {
+      "path": "notebook_benchmark/baseline/06_nlp_text_classification/attempt_1.py",
+      "bytes": 2433
+    },
+    {
+      "path": "notebook_benchmark/baseline/06_nlp_text_classification/attempt_2.py",
+      "bytes": 2433
+    },
+    {
+      "path": "notebook_benchmark/baseline/06_nlp_text_classification/generated_solution.py",
+      "bytes": 2433
+    },
+    {
+      "path": "notebook_benchmark/baseline/06_nlp_text_classification/notebook.ipynb",
+      "bytes": 16933
+    },
+    {
+      "path": "notebook_benchmark/baseline/06_nlp_text_classification/notebook_attempt_0.ipynb",
+      "bytes": 16933
+    },
+    {
+      "path": "notebook_benchmark/baseline/06_nlp_text_classification/notebook_attempt_1.ipynb",
+      "bytes": 16933
+    },
+    {
+      "path": "notebook_benchmark/baseline/06_nlp_text_classification/notebook_attempt_2.ipynb",
+      "bytes": 16933
+    },
+    {
+      "path": "notebook_benchmark/baseline/06_nlp_text_classification/task_report.json",
+      "bytes": 14185
+    },
+    {
+      "path": "notebook_benchmark/baseline/07_combinatorial_optimization/attempt_0.py",
+      "bytes": 3254
+    },
+    {
+      "path": "notebook_benchmark/baseline/07_combinatorial_optimization/attempt_1.py",
+      "bytes": 2918
+    },
+    {
+      "path": "notebook_benchmark/baseline/07_combinatorial_optimization/generated_solution.py",
+      "bytes": 2918
+    },
+    {
+      "path": "notebook_benchmark/baseline/07_combinatorial_optimization/notebook_attempt_0.ipynb",
+      "bytes": 13261
+    },
+    {
+      "path": "notebook_benchmark/baseline/07_combinatorial_optimization/notebook_attempt_1.ipynb",
+      "bytes": 12898
+    },
+    {
+      "path": "notebook_benchmark/sandbox_preflight.json",
+      "bytes": 65
+    },
+    {
+      "path": "ollama-install-stderr.log",
+      "bytes": 0
+    },
+    {
+      "path": "ollama-install.log",
+      "bytes": 5094
+    },
+    {
+      "path": "ollama-list-after-pull.txt",
+      "bytes": 175
+    },
+    {
+      "path": "ollama-ps.txt",
+      "bytes": 239
+    },
+    {
+      "path": "ollama-stop.log",
+      "bytes": 55
+    },
+    {
+      "path": "ollama-systemd.log",
+      "bytes": 289462
+    },
+    {
+      "path": "ollama_memory_samples.csv",
+      "bytes": 73136
+    },
+    {
+      "path": "ollama_model_list.json",
+      "bytes": 220
+    },
+    {
+      "path": "ollama_setup_status.txt",
+      "bytes": 15
+    },
+    {
+      "path": "peak_memory.json",
+      "bytes": 327
+    },
+    {
+      "path": "run_metadata.json",
+      "bytes": 341
+    },
+    {
+      "path": "runner_resources.json",
+      "bytes": 476
+    },
+    {
+      "path": "swap-policy.txt",
+      "bytes": 87
+    },
+    {
+      "path": "workflow_status.json",
+      "bytes": 94
+    }
+  ]
+}

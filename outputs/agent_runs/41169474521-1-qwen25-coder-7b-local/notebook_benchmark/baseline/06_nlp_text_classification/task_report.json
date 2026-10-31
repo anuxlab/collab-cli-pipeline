@@ -1,0 +1,304 @@
+{
+  "task": {
+    "id": "06_nlp_text_classification",
+    "level": "6-nlp",
+    "title": "Small-data NLP with error analysis",
+    "rubric": [
+      "TfidfVectorizer",
+      "Pipeline",
+      "LogisticRegression",
+      "precision",
+      "recall",
+      "misclassified"
+    ],
+    "prompt": "Create a self-contained NLP sentiment classification notebook using a thoughtfully designed synthetic but varied corpus of at least 40 short positive/negative texts (no downloads). Use stratified split, a Pipeline with TfidfVectorizer and LogisticRegression, compare with a simple majority baseline, report precision/recall/F1 and confusion matrix, inspect misclassified texts, and discuss synthetic-data limitations and lexical shortcuts. Include assertions and a plot. Print BENCHMARK_RESULT=<JSON> with task_id, samples, accuracy, f1, baseline_accuracy, misclassified_count."
+  },
+  "attempts": [
+    {
+      "attempt": 0,
+      "duration_seconds": 151.46,
+      "execution": {
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "mkdir -p failed for path /.config/matplotlib: [Errno 30] Read-only file system: '/.config'\nMatplotlib created a temporary cache directory at /tmp/matplotlib-bgmv150v because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.\nTraceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 9, in <module>\n    import seaborn as sns\nModuleNotFoundError: No module named 'seaborn'\n",
+        "duration_seconds": 2.276,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": "3a1c694e6e6606f9dca9e381ae3ea64b1541fb3418e7abce8cf11e15c0d866b4",
+        "infrastructure_error": false
+      },
+      "score": {
+        "task_id": "06_nlp_text_classification",
+        "level": "6-nlp",
+        "title": "Small-data NLP with error analysis",
+        "score": 48.33,
+        "components": {
+          "syntax_validity": 10,
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 13.33,
+          "notebook_structure": 10,
+          "source_reconstruction": 5,
+          "section_diversity": 10
+        },
+        "rubric_hits": [
+          "TfidfVectorizer",
+          "Pipeline",
+          "LogisticRegression",
+          "misclassified"
+        ],
+        "rubric_missing": [
+          "precision",
+          "recall"
+        ],
+        "execution_ok": false,
+        "syntax_valid": true,
+        "infrastructure_error": false,
+        "failure_category": "execution",
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 19,
+        "markdown_cells": 20,
+        "section_headings": [
+          "Environment and imports",
+          "Experiment execution",
+          "Experiment configuration",
+          "Experiment execution",
+          "Experiment configuration",
+          "Train-test split and cross-validation",
+          "Text preprocessing and vectorization",
+          "Feature engineering and preprocessing",
+          "Text classification and error analysis",
+          "Evaluation and metrics",
+          "Experiment execution",
+          "Baseline and reference methods",
+          "Text classification and error analysis",
+          "Visualization",
+          "Data inspection and exploratory analysis",
+          "Experiment execution",
+          "Visualization",
+          "Text classification and error analysis",
+          "Experiment execution"
+        ],
+        "returncode": 1,
+        "timed_out": false,
+        "stderr": "mkdir -p failed for path /.config/matplotlib: [Errno 30] Read-only file system: '/.config'\nMatplotlib created a temporary cache directory at /tmp/matplotlib-bgmv150v because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.\nTraceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 9, in <module>\n    import seaborn as sns\nModuleNotFoundError: No module named 'seaborn'\n"
+      },
+      "failure_category": "execution",
+      "script": "attempt_0.py",
+      "notebook": "notebook_attempt_0.ipynb"
+    },
+    {
+      "attempt": 1,
+      "duration_seconds": 164.27,
+      "execution": {
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "mkdir -p failed for path /.config/matplotlib: [Errno 30] Read-only file system: '/.config'\nMatplotlib created a temporary cache directory at /tmp/matplotlib-1t_l2498 because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.\nTraceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 9, in <module>\n    import seaborn as sns\nModuleNotFoundError: No module named 'seaborn'\n",
+        "duration_seconds": 2.128,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": "9e1b0de64ddd86807ff756111b0c0e94df1cfd44f092c670389ba20aea6774fa",
+        "infrastructure_error": false
+      },
+      "score": {
+        "task_id": "06_nlp_text_classification",
+        "level": "6-nlp",
+        "title": "Small-data NLP with error analysis",
+        "score": 48.33,
+        "components": {
+          "syntax_validity": 10,
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 13.33,
+          "notebook_structure": 10,
+          "source_reconstruction": 5,
+          "section_diversity": 10
+        },
+        "rubric_hits": [
+          "TfidfVectorizer",
+          "Pipeline",
+          "LogisticRegression",
+          "misclassified"
+        ],
+        "rubric_missing": [
+          "precision",
+          "recall"
+        ],
+        "execution_ok": false,
+        "syntax_valid": true,
+        "infrastructure_error": false,
+        "failure_category": "execution",
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 19,
+        "markdown_cells": 20,
+        "section_headings": [
+          "Environment and imports",
+          "Experiment execution",
+          "Experiment configuration",
+          "Experiment execution",
+          "Experiment configuration",
+          "Train-test split and cross-validation",
+          "Text preprocessing and vectorization",
+          "Feature engineering and preprocessing",
+          "Text classification and error analysis",
+          "Evaluation and metrics",
+          "Experiment execution",
+          "Baseline and reference methods",
+          "Text classification and error analysis",
+          "Visualization",
+          "Data inspection and exploratory analysis",
+          "Experiment execution",
+          "Visualization",
+          "Text classification and error analysis",
+          "Experiment execution"
+        ],
+        "returncode": 1,
+        "timed_out": false,
+        "stderr": "mkdir -p failed for path /.config/matplotlib: [Errno 30] Read-only file system: '/.config'\nMatplotlib created a temporary cache directory at /tmp/matplotlib-1t_l2498 because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.\nTraceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 9, in <module>\n    import seaborn as sns\nModuleNotFoundError: No module named 'seaborn'\n"
+      },
+      "failure_category": "execution",
+      "script": "attempt_1.py",
+      "notebook": "notebook_attempt_1.ipynb"
+    },
+    {
+      "attempt": 2,
+      "duration_seconds": 169.22,
+      "execution": {
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "mkdir -p failed for path /.config/matplotlib: [Errno 30] Read-only file system: '/.config'\nMatplotlib created a temporary cache directory at /tmp/matplotlib-v2obhonq because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.\nTraceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 9, in <module>\n    import seaborn as sns\nModuleNotFoundError: No module named 'seaborn'\n",
+        "duration_seconds": 2.037,
+        "timed_out": false,
+        "sandbox": "docker-network-disabled",
+        "container_id": "eda76959217454da5f9e05f4a2621df57391e97f6de62a101f76728c3dafc8fd",
+        "infrastructure_error": false
+      },
+      "score": {
+        "task_id": "06_nlp_text_classification",
+        "level": "6-nlp",
+        "title": "Small-data NLP with error analysis",
+        "score": 48.33,
+        "components": {
+          "syntax_validity": 10,
+          "execution": 0,
+          "structured_result": 0,
+          "rubric_coverage": 13.33,
+          "notebook_structure": 10,
+          "source_reconstruction": 5,
+          "section_diversity": 10
+        },
+        "rubric_hits": [
+          "TfidfVectorizer",
+          "Pipeline",
+          "LogisticRegression",
+          "misclassified"
+        ],
+        "rubric_missing": [
+          "precision",
+          "recall"
+        ],
+        "execution_ok": false,
+        "syntax_valid": true,
+        "infrastructure_error": false,
+        "failure_category": "execution",
+        "task_result_ok": false,
+        "source_reconstruction_ok": true,
+        "result": null,
+        "code_cells": 19,
+        "markdown_cells": 20,
+        "section_headings": [
+          "Environment and imports",
+          "Experiment execution",
+          "Experiment configuration",
+          "Experiment execution",
+          "Experiment configuration",
+          "Train-test split and cross-validation",
+          "Text preprocessing and vectorization",
+          "Feature engineering and preprocessing",
+          "Text classification and error analysis",
+          "Evaluation and metrics",
+          "Experiment execution",
+          "Baseline and reference methods",
+          "Text classification and error analysis",
+          "Visualization",
+          "Data inspection and exploratory analysis",
+          "Experiment execution",
+          "Visualization",
+          "Text classification and error analysis",
+          "Experiment execution"
+        ],
+        "returncode": 1,
+        "timed_out": false,
+        "stderr": "mkdir -p failed for path /.config/matplotlib: [Errno 30] Read-only file system: '/.config'\nMatplotlib created a temporary cache directory at /tmp/matplotlib-v2obhonq because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.\nTraceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 9, in <module>\n    import seaborn as sns\nModuleNotFoundError: No module named 'seaborn'\n"
+      },
+      "failure_category": "execution",
+      "script": "attempt_2.py",
+      "notebook": "notebook_attempt_2.ipynb"
+    }
+  ],
+  "final_score": {
+    "task_id": "06_nlp_text_classification",
+    "level": "6-nlp",
+    "title": "Small-data NLP with error analysis",
+    "score": 48.33,
+    "components": {
+      "syntax_validity": 10,
+      "execution": 0,
+      "structured_result": 0,
+      "rubric_coverage": 13.33,
+      "notebook_structure": 10,
+      "source_reconstruction": 5,
+      "section_diversity": 10
+    },
+    "rubric_hits": [
+      "TfidfVectorizer",
+      "Pipeline",
+      "LogisticRegression",
+      "misclassified"
+    ],
+    "rubric_missing": [
+      "precision",
+      "recall"
+    ],
+    "execution_ok": false,
+    "syntax_valid": true,
+    "infrastructure_error": false,
+    "failure_category": "execution",
+    "task_result_ok": false,
+    "source_reconstruction_ok": true,
+    "result": null,
+    "code_cells": 19,
+    "markdown_cells": 20,
+    "section_headings": [
+      "Environment and imports",
+      "Experiment execution",
+      "Experiment configuration",
+      "Experiment execution",
+      "Experiment configuration",
+      "Train-test split and cross-validation",
+      "Text preprocessing and vectorization",
+      "Feature engineering and preprocessing",
+      "Text classification and error analysis",
+      "Evaluation and metrics",
+      "Experiment execution",
+      "Baseline and reference methods",
+      "Text classification and error analysis",
+      "Visualization",
+      "Data inspection and exploratory analysis",
+      "Experiment execution",
+      "Visualization",
+      "Text classification and error analysis",
+      "Experiment execution"
+    ],
+    "returncode": 1,
+    "timed_out": false,
+    "stderr": "mkdir -p failed for path /.config/matplotlib: [Errno 30] Read-only file system: '/.config'\nMatplotlib created a temporary cache directory at /tmp/matplotlib-v2obhonq because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.\nTraceback (most recent call last):\n  File \"/workspace/generated_solution.py\", line 9, in <module>\n    import seaborn as sns\nModuleNotFoundError: No module named 'seaborn'\n"
+  },
+  "final_status": "failed",
+  "failure_category": "execution",
+  "final_notebook": "/home/runner/work/collab-cli-pipeline/collab-cli-pipeline/outputs/agent_runs/41169474521-1-qwen25-coder-7b-local/notebook_benchmark/baseline/06_nlp_text_classification/notebook.ipynb"
+}
